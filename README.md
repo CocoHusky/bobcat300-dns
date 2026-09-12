@@ -84,6 +84,7 @@ The router can continue to provide DHCP. Configure it to hand out the Bobcat as 
 5. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
 6. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
 7. [Validate the installation](docs/07-validation-maintenance.md).
+8. [Apply final security hardening](docs/11-security-hardening.md).
 
 Optional operations:
 
@@ -93,7 +94,7 @@ Optional operations:
 
 ## Quick start
 
-Use the numbered documents above. The DNS service is complete after Pi-hole and Unbound; Tailscale, NetAlertX, and storage tuning are optional additions. Do not skip time setup before installing services that depend on HTTPS or TLS.
+Use the numbered documents above. The DNS service is complete after Pi-hole and Unbound; Tailscale, NetAlertX, and storage tuning are optional additions. Do not skip time setup before installing services that depend on HTTPS or TLS. Apply the security-hardening guide after the appliance is working and validated so firewall changes do not complicate initial setup.
 
 ## Replace these placeholders
 
