@@ -156,4 +156,8 @@ dig @BOBCAT_LAN_IP doubleclick.net +short
 
 ## Scope
 
-This project covers the supported microSD-based DNS appliance. Hardware expansion experiments and unrelated configurations are outside its scope.
+This project covers supported Bobcat Miner 300 revisions and their documented boot methods. Hardware expansion experiments and unrelated configurations are outside its scope.
+
+## License
+
+This repository's documentation and scripts are licensed under the [MIT License](LICENSE). Armbian images and the Pi-hole, Unbound, Tailscale, and NetAlertX projects are separate projects with their own licenses and terms.

@@ -20,9 +20,11 @@ Use the pull request template and include:
 
 Before opening a pull request:
 
-- Build or run the project if applicable.
-- Check formatting if the project has a formatter.
+- Run `bash -n scripts/*.sh`.
+- Run `git diff --check`.
+- Search the change for secrets, real network details, serial numbers, and private hostnames.
 - Update README or docs when behavior changes.
+- Test installation changes on the affected Bobcat variant when possible.
 
 ## Commit style
 

@@ -32,4 +32,6 @@ If a secret is committed, rotate or revoke it immediately and remove it from Git
 
 ## Supported versions
 
-For template-generated projects, define supported versions after the project has releases.
+Security fixes are considered for the current `main` branch and the latest tagged release, if releases are published. Older revisions may contain outdated installation steps or dependencies and should be upgraded before troubleshooting a security issue.
+
+This is a community hardware and configuration project; it does not provide a managed service or security-response SLA. Keep Armbian, Pi-hole, Unbound, Tailscale, Docker, and any optional monitoring software updated on the device.

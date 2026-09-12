@@ -39,7 +39,7 @@ free -h
 df -h /
 ```
 
-The Bobcat G285 is ARM64 (`aarch64`) with about 2 GB RAM.
+Supported Bobcat Miner 300 revisions are expected to be ARM64 (`aarch64`). Available memory varies by board and image; confirm it with `free -h` before enabling additional services.
 
 ### 2. Install Docker
 
