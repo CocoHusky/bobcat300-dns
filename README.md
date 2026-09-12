@@ -11,7 +11,7 @@ Repurpose a decommissioned Bobcat Miner 300 (G285 / RK3566) into a small always-
 
 This repository documents a working Bobcat 285 conversion and focuses on repeatable setup steps. Public documentation uses placeholders instead of real hostnames, LAN addresses, Tailscale addresses, account names, or private service names.
 
-> Tested platform: Bobcat 285 / G285, RK3566, ~2 GB RAM, Armbian 26.02 rolling, Linux 6.18.4-current-rockchip64.
+> Implemented and tested on: Bobcat 285 / G285, Rockchip RK3566, ARM64, approximately 2 GB RAM, with a Debian Bookworm-based Armbian image.
 
 ## What the finished system does
 
@@ -37,6 +37,8 @@ BOBCAT_LAN_IP
    +--> optional NetAlertX :20211
           |
           +--> LAN device discovery and change monitoring
+
+Armbian ramlog: /var/log on zram -> /var/log.hdd persistent backing storage
 ```
 
 The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
@@ -51,6 +53,7 @@ The router can continue to provide DHCP. Configure it to hand out the Bobcat as 
 - [`docs/06-router-and-clients.md`](docs/06-router-and-clients.md) — point the network at the Bobcat
 - [`docs/07-validation-maintenance.md`](docs/07-validation-maintenance.md) — health checks, backups, updates, and recovery
 - [`docs/08-netalertx.md`](docs/08-netalertx.md) — optional LAN device monitoring with NetAlertX
+- [`docs/09-storage-and-ramlog.md`](docs/09-storage-and-ramlog.md) — Armbian RAM-backed logging and storage
 - [`scripts/health-check.sh`](scripts/health-check.sh) — quick validation script
 - [`scripts/install-netalertx.sh`](scripts/install-netalertx.sh) — optional NetAlertX installer
 

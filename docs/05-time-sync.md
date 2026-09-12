@@ -2,13 +2,7 @@
 
 Correct system time matters because HTTPS, package repositories, Tailscale, DNSSEC, and TLS certificate validation all depend on it.
 
-On the tested Bobcat, the hardware RTC once restored this old timestamp during boot:
-
-```text
-2017-08-05
-```
-
-The machine was reachable over LAN SSH, but Tailscale could not authenticate because TLS certificates appeared to be "not yet valid".
+On the tested Bobcat, the hardware RTC once restored a date several years in the past during boot. The machine was reachable over LAN SSH, but Tailscale could not authenticate because TLS certificates appeared to be "not yet valid".
 
 The fix is to make Chrony correct large clock errors immediately after network access becomes available and keep the RTC synchronized.
 
@@ -89,7 +83,7 @@ Depending on the image/systemd integration, `timedatectl` may not perfectly desc
 If the device boots years in the past and network services fail before Chrony can recover, set the date approximately correct once:
 
 ```bash
-sudo date -s "2026-09-12 00:20:00"
+sudo date -s "YYYY-MM-DD HH:MM:SS"
 ```
 
 Use the actual current date/time, not the example above.
@@ -111,11 +105,11 @@ tailscale ip -4
 
 ## 6. Recognizing a time-caused Tailscale failure
 
-The failure seen on the tested appliance looked like:
+The failure can look like:
 
 ```text
 x509: certificate has expired or is not yet valid
-current time 2017-08-05...
+current time is far in the past
 ```
 
 and:

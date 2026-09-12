@@ -27,6 +27,14 @@ tailscale ip -4
 ip -br addr show tailscale0
 ```
 
+The Bobcat should ideally not use the tailnet DNS server that points back to itself. After Pi-hole is working, keep the host's resolver path independent:
+
+```bash
+sudo tailscale set --accept-dns=false
+```
+
+The tailnet can still use the Bobcat as its configured nameserver; this setting applies to the Bobcat host and avoids a circular dependency while Tailscale and Chrony bootstrap.
+
 Treat the output of `tailscale status` as environment-specific information. It can include private device names and addresses, so review it before posting publicly.
 
 ## 3. Verify Pi-hole directly over Tailscale

@@ -71,15 +71,36 @@ sudo docker run -d \
   --name netalertx \
   --network=host \
   --restart unless-stopped \
-  --cap-add=NET_RAW \
+  --read-only \
+  --cap-drop=ALL \
+  --cap-add=CHOWN \
+  --cap-add=SETGID \
+  --cap-add=SETUID \
   --cap-add=NET_ADMIN \
   --cap-add=NET_BIND_SERVICE \
+  --cap-add=NET_RAW \
+  --pids-limit=512 \
+  --log-opt=max-size=10m \
+  --log-opt=max-file=3 \
   -v /opt/netalertx:/data \
   -v /etc/localtime:/etc/localtime:ro \
-  --tmpfs /tmp:uid=20211,gid=20211,mode=1700 \
+  --tmpfs /tmp:uid=20211,gid=20211,mode=1700,rw,noexec,nosuid,nodev \
   -e PORT=20211 \
-  -e APP_CONF_OVERRIDE='{"GRAPHQL_PORT":"20214"}' \
+  -e PUID=20211 \
+  -e PGID=20211 \
+  -e LISTEN_ADDR=0.0.0.0 \
+  -e GRAPHQL_PORT=20214 \
   ghcr.io/netalertx/netalertx:latest
+```
+
+Apply ARP-flux mitigation on the host so LAN IP/MAC association is more reliable with host networking:
+
+```bash
+sudo tee /etc/sysctl.d/99-netalertx.conf >/dev/null <<'EOF'
+net.ipv4.conf.all.arp_ignore=1
+net.ipv4.conf.all.arp_announce=2
+EOF
+sudo sysctl --system
 ```
 
 ### 5. Verify the container
@@ -121,7 +142,7 @@ sudo docker pull ghcr.io/netalertx/netalertx:latest
 sudo docker rm -f netalertx
 ```
 
-Then rerun the same `docker run` command. Persistent configuration and database data stay under `/opt/netalertx`.
+Then rerun the installer. Persistent configuration and database data stay under `/opt/netalertx`.
 
 ## Backup
 

@@ -64,6 +64,27 @@ fi
 
 section "LISTENING PORTS"
 ss -lntup 2>/dev/null | grep -E '(:53 |:5335 )' || true
+ss -lntup 2>/dev/null | grep -E '(:20211 |:20214 )' || true
+
+section "DOCKER"
+systemctl is-active docker 2>/dev/null || true
+
+section "NETALERTX"
+if command -v docker >/dev/null 2>&1; then
+  docker ps --filter name=netalertx || true
+  docker inspect --format 'Health: {{if .State.Health}}{{.State.Health.Status}}{{else}}not reported{{end}}' netalertx 2>/dev/null || true
+  curl -I --max-time 5 http://127.0.0.1:20211/ 2>/dev/null || true
+else
+  echo "docker command not found"
+fi
+
+section "ARP SETTINGS"
+sysctl net.ipv4.conf.all.arp_ignore 2>/dev/null || true
+sysctl net.ipv4.conf.all.arp_announce 2>/dev/null || true
+
+section "RAM LOGGING"
+systemctl is-active armbian-ramlog 2>/dev/null || true
+mount | grep '/var/log' || true
 
 section "STORAGE"
 df -h /
