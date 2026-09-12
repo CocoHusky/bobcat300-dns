@@ -66,16 +66,14 @@ flowchart LR
 
 ## Core setup
 
-First connect the Bobcat to the network. Use the [networking guide](docs/networking.md) if Ethernet, Wi-Fi, or stable addressing is not already working.
-
-1. [Install the correct Armbian image](docs/01-armbian-install.md).
+1. [Install Armbian and configure the network](docs/01-armbian-install.md).
 2. [Install Pi-hole and Unbound](docs/02-pihole-unbound.md).
 3. [Add Tailscale](docs/03-tailscale.md).
 4. [Install NetAlertX](docs/04-netalertx.md).
 
 ```mermaid
 flowchart LR
-    flash[Install matching Armbian image] --> dns[Install Pi-hole and Unbound]
+    flash[Install Armbian and configure network] --> dns[Install Pi-hole and Unbound]
     dns --> ts[Add Tailscale]
     ts --> monitor[Install NetAlertX]
 ```
@@ -84,7 +82,6 @@ flowchart LR
 
 These guides contain useful setup, maintenance, and recovery details outside the four core steps:
 
-- [Networking](docs/networking.md) — Ethernet, Wi-Fi, and stable addressing.
 - [Time and RTC setup](docs/time-and-rtc.md) — complete before Tailscale if the clock is incorrect.
 - [Router and client DNS](docs/router-and-clients.md) — point the home network at Pi-hole.
 - [Validation, maintenance, and recovery](docs/validation-maintenance.md).

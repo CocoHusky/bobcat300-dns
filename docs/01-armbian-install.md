@@ -85,6 +85,49 @@ Linux ...-rockchip64
 Debian ... userspace
 ```
 
+## Set up and verify networking
+
+Use Ethernet for the first boot when possible. It is easier to recover and more reliable for a DNS appliance. Connect the cable, boot the Bobcat, and find its address in the router's DHCP client list.
+
+Check the interfaces and route:
+
+```bash
+ip -br addr
+nmcli device status
+ip route
+```
+
+If the Bobcat variant supports Wi-Fi and no saved profile exists, create one with NetworkManager:
+
+```bash
+nmcli device wifi list
+sudo nmcli device wifi connect "YOUR_WIFI_SSID" password "YOUR_WIFI_PASSWORD" ifname wlan0
+```
+
+Use a DHCP reservation in the router, or configure a static address after identifying the active profile:
+
+```bash
+nmcli connection show
+sudo nmcli connection modify "WIFI_PROFILE" \
+  ipv4.method manual \
+  ipv4.addresses BOBCAT_LAN_CIDR \
+  ipv4.gateway ROUTER_LAN_IP \
+  ipv4.dns ROUTER_LAN_IP
+sudo nmcli connection up "WIFI_PROFILE"
+```
+
+For Ethernet, replace `WIFI_PROFILE` with the wired profile name. The G280 is listed upstream as Wi-Fi-free.
+
+Verify local routing, internet access, and DNS before installing services:
+
+```bash
+ping -c 2 ROUTER_LAN_IP
+ping -c 2 1.1.1.1
+getent hosts debian.org
+```
+
+The Bobcat is ready for the core setup when it has a stable address, a default route, and working DNS. Continue with [02-pihole-unbound.md](02-pihole-unbound.md).
+
 ## Confirm you are on the expected board and storage
 
 ```bash
@@ -158,4 +201,4 @@ Confirm:
 hostname
 ```
 
-If networking is not working, use [networking.md](networking.md). Otherwise continue with [02-pihole-unbound.md](02-pihole-unbound.md).
+If networking stops working later, use [troubleshooting.md](troubleshooting.md).

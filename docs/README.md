@@ -2,13 +2,9 @@
 
 Use the four core guides to build the appliance. Use the supporting guides when that part of the setup applies to you.
 
-## Before core setup
-
-- [Networking](networking.md) — connect by Ethernet or Wi-Fi and give the Bobcat a stable address. Do this before installing services.
-
 ## Core setup
 
-1. [Install Armbian](01-armbian-install.md) — flash the image that matches the Bobcat revision.
+1. [Install Armbian and configure the network](01-armbian-install.md) — flash the matching image, connect Ethernet or Wi-Fi, and verify internet access.
 2. [Install Pi-hole and Unbound](02-pihole-unbound.md) — create the local filtered DNS resolver.
 3. [Add Tailscale](03-tailscale.md) — enable secure remote access and remote DNS.
 4. [Install NetAlertX](04-netalertx.md) — add LAN device discovery and monitoring.
@@ -24,9 +20,7 @@ Use the four core guides to build the appliance. Use the supporting guides when 
 ## Short version
 
 ```text
-Networking prerequisite
-        ↓
-Armbian → Pi-hole + Unbound → Tailscale → NetAlertX
+Armbian + network → Pi-hole + Unbound → Tailscale → NetAlertX
         ↓
 Router DNS → Validation → Security hardening
 ```
