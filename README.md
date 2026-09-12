@@ -6,7 +6,6 @@ Turn a supported Bobcat Miner 300 into a small home-network appliance running:
 - Pi-hole for network-wide DNS filtering
 - Unbound as a local recursive DNS resolver
 - Tailscale for secure remote access and remote DNS filtering
-- Chrony for reliable time synchronization
 - NetAlertX for LAN device discovery and change monitoring
 
 ![Bobcat DNS appliance](assets/bobcat-dns-appliance-hero.jpg)
@@ -80,7 +79,7 @@ flowchart LR
 
 ## Supporting guides
 
-These guides contain useful setup, maintenance, and recovery details outside the four core steps:
+These guides contain setup, maintenance, and recovery details outside the four core steps:
 
 - [Time and RTC setup](docs/time-and-rtc.md) — complete before Tailscale if the clock is incorrect.
 - [Router and client DNS](docs/router-and-clients.md) — point the home network at Pi-hole.
