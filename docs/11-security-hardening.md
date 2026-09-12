@@ -87,7 +87,45 @@ sudo ufw status verbose
 
 These rules intentionally allow trusted LAN and Tailscale peers to reach the appliance while denying unsolicited inbound traffic from other networks.
 
-## 4. Why Pi-hole and Unbound still work
+## 4. Tighten broad temporary rules
+
+The broad LAN and Tailscale rules above are a safe starting point while you confirm the appliance works. After validation, replace them with service-specific rules. Keep the SSH rule before deleting broad access, and replace the placeholders first:
+
+```bash
+LAN_INTERFACE="LAN_INTERFACE"
+LAN_SUBNET="LAN_SUBNET"
+
+sudo ufw allow in on "$LAN_INTERFACE" from "$LAN_SUBNET" to any port 22 proto tcp
+sudo ufw allow in on "$LAN_INTERFACE" from "$LAN_SUBNET" to any port 53 proto tcp
+sudo ufw allow in on "$LAN_INTERFACE" from "$LAN_SUBNET" to any port 53 proto udp
+sudo ufw allow in on "$LAN_INTERFACE" from "$LAN_SUBNET" to any port 80 proto tcp
+sudo ufw allow in on "$LAN_INTERFACE" from "$LAN_SUBNET" to any port 443 proto tcp
+
+sudo ufw allow in on tailscale0 to any port 22 proto tcp
+sudo ufw allow in on tailscale0 to any port 53 proto tcp
+sudo ufw allow in on tailscale0 to any port 53 proto udp
+sudo ufw allow in on tailscale0 to any port 80 proto tcp
+sudo ufw allow in on tailscale0 to any port 443 proto tcp
+```
+
+If NetAlertX is installed, also allow only its web interface—not its internal API—from trusted networks:
+
+```bash
+sudo ufw allow in on "$LAN_INTERFACE" from "$LAN_SUBNET" to any port 20211 proto tcp
+sudo ufw allow in on tailscale0 to any port 20211 proto tcp
+```
+
+Remove the broad rules only after the specific rules are present:
+
+```bash
+sudo ufw delete allow from "$LAN_SUBNET"
+sudo ufw delete allow from 100.64.0.0/10
+sudo ufw status numbered
+```
+
+Port `20214` is NetAlertX's internal API and should not be allowed to LAN, Tailscale, or internet clients. Local NetAlertX components can continue to use it.
+
+## 5. Why Pi-hole and Unbound still work
 
 The intended DNS path remains:
 
@@ -119,7 +157,7 @@ The expected interface is:
 127.0.0.1:5335
 ```
 
-## 5. Verify Pi-hole exposure
+## 6. Verify Pi-hole exposure
 
 Pi-hole may use `listeningMode = "ALL"` when the appliance must answer DNS on both the LAN interface and Tailscale. This is acceptable only when network exposure is controlled by the host firewall and router.
 
@@ -131,7 +169,7 @@ pihole-FTL --config dns.listeningMode
 
 Do not expose TCP or UDP port 53 directly to the public internet.
 
-## 6. Check Tailscale routing behavior
+## 7. Check Tailscale routing behavior
 
 A normal DNS appliance does not need to advertise LAN routes or act as an exit node.
 
@@ -143,7 +181,7 @@ tailscale debug prefs 2>/dev/null | grep -E '"(AdvertiseRoutes|ExitNodeID|CorpDN
 
 Only enable subnet routing, exit-node behavior, or Tailscale SSH if you deliberately want those features.
 
-## 7. Check the router
+## 8. Check the router
 
 The router remains an important security boundary. Verify that it does not forward appliance service ports from the public internet unless that exposure is intentional and separately secured.
 
@@ -160,7 +198,9 @@ For this appliance, there is normally no reason to create public port forwards f
 
 Remote access should use Tailscale instead of public port forwarding.
 
-## 8. Validate after enabling the firewall
+The host cannot verify router configuration. Confirm in the router that there is no port forward or DMZ/exposed-host rule targeting the Bobcat. The intended internet-facing exception is normal Tailscale UDP transport; DNS, SSH, Pi-hole, and NetAlertX should not be forwarded.
+
+## 9. Validate after enabling the firewall
 
 Test Unbound locally:
 
@@ -192,7 +232,23 @@ ss -lntup
 
 If all tests pass, the DNS chain is still working while unnecessary inbound exposure is reduced.
 
-## 9. Ongoing security checks
+## 10. Expected final exposure
+
+After the firewall and router checks are complete, the intended exposure is:
+
+| Service | LAN | Tailscale | Internet |
+| --- | --- | --- | --- |
+| SSH, TCP 22 | trusted only | trusted only | blocked |
+| Pi-hole, TCP/UDP 53 | allowed | allowed | blocked |
+| Pi-hole web, TCP 80/443 | allowed | allowed | blocked |
+| NetAlertX web, TCP 20211 | optional, trusted only | optional, trusted only | blocked |
+| Unbound, TCP/UDP 5335 | localhost only | blocked | blocked |
+| NetAlertX API, TCP 20214 | blocked | blocked | blocked |
+| Tailscale transport, UDP 41641 | n/a | n/a | allowed as needed |
+
+There should be no unsolicited public inbound access to the appliance services.
+
+## 11. Ongoing security checks
 
 Periodically review:
 
