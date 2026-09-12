@@ -132,6 +132,19 @@ DNS_HOSTNAME       replace with the hostname you choose
 WIFI_PROFILE       replace with your NetworkManager Wi-Fi profile name
 ```
 
+For example, after replacing the placeholders on one installation, commands might look like this:
+
+```text
+BOBCAT_LAN_IP      192.0.2.25
+BOBCAT_LAN_CIDR    192.0.2.25/24
+ROUTER_LAN_IP      192.0.2.1
+TAILSCALE_IP       100.64.0.10
+DNS_HOSTNAME       bobcat-dns
+WIFI_PROFILE       Home Wi-Fi
+```
+
+These values are examples only. Use the addresses, hostname, and Wi-Fi profile from your own network. Do not copy this example block into a live configuration unchanged.
+
 Do not commit real credentials, Wi-Fi SSIDs/passwords, MAC addresses, Tailscale state, private hostnames, or personal infrastructure names.
 
 ## Important notes
