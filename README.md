@@ -9,7 +9,7 @@ Turn a supported Bobcat Miner 300 into a small home-network appliance running:
 - Chrony for reliable time synchronization
 - Optional NetAlertX for LAN device discovery and change monitoring
 
-![Bobcat DNS appliance](assets/bobcat-dns-appliance-hero.png)
+![Bobcat DNS appliance](assets/bobcat-dns-appliance-hero.jpg)
 
 The goal is practical: reuse inexpensive hardware that is otherwise sitting idle instead of buying a new single-board computer.
 

@@ -2,9 +2,9 @@
 
 Start with the model-specific images and instructions in the [Bobcat-Armbian project](https://github.com/sicXnull/Bobcat-Armbian). Bobcat revisions use different boot methods and device trees.
 
-![Bobcat hardware overview](../assets/bobcat-hardware-overview.png)
+![Sanitized Bobcat hardware overview](../assets/bobcat-hardware-overview.jpg)
 
-*Illustration only. Confirm the ports, board revision, and radio hardware on your own device.*
+*Photograph of a Bobcat board with identifying labels and barcodes removed. Confirm the ports, board revision, and radio hardware on your own device.*
 
 ## Supported variants
 
