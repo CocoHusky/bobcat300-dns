@@ -7,6 +7,7 @@ Repurpose a decommissioned Bobcat Miner 300 (G285 / RK3566) into a small always-
 - Unbound as a local recursive DNS resolver
 - Tailscale for secure remote access and remote DNS filtering
 - Chrony for reliable time synchronization
+- Optional NetAlertX for LAN device discovery and change monitoring
 
 This repository documents the conversion that was actually implemented on a Bobcat 285. It focuses on the useful end state and the repeatable setup steps. It intentionally leaves out abandoned experiments and hardware changes that were never used in the final system.
 
@@ -32,8 +33,12 @@ Bobcat 300
    |   authoritative DNS hierarchy
    |
    +--> Tailscale 100.x.x.x
+   |      |
+   |      +--> remote devices can use the same Pi-hole
+   |
+   +--> optional NetAlertX :20211
           |
-          +--> remote devices can use the same Pi-hole
+          +--> LAN device discovery and change monitoring
 ```
 
 The router continues to provide DHCP. The router is configured to hand out the Bobcat as the primary DNS server.
@@ -47,7 +52,9 @@ The router continues to provide DHCP. The router is configured to hand out the B
 - [`docs/05-time-sync.md`](docs/05-time-sync.md) — Chrony, RTC, and avoiding TLS failures after reboot
 - [`docs/06-router-and-clients.md`](docs/06-router-and-clients.md) — point the network at the Bobcat
 - [`docs/07-validation-maintenance.md`](docs/07-validation-maintenance.md) — health checks, backups, updates, and recovery
+- [`docs/08-netalertx.md`](docs/08-netalertx.md) — optional LAN device monitoring with NetAlertX
 - [`scripts/health-check.sh`](scripts/health-check.sh) — quick validation script
+- [`scripts/install-netalertx.sh`](scripts/install-netalertx.sh) — optional NetAlertX installer
 
 ## Quick start
 
@@ -65,7 +72,8 @@ The detailed procedure is in the docs, but the full flow is:
 10. Set the Bobcat's Tailscale IP as the tailnet DNS server if remote filtering is desired.
 11. Configure Chrony so time is corrected quickly after boot.
 12. Set the router's LAN DNS server to the Bobcat's static LAN IP.
-13. Run the validation commands in this repo.
+13. Optionally install NetAlertX for LAN device monitoring.
+14. Run the validation commands in this repo.
 
 ## Reference addresses from the tested build
 
@@ -78,6 +86,7 @@ LAN gateway:       192.168.0.1
 Pi-hole DNS:       192.168.0.164:53
 Unbound:           127.0.0.1:5335
 Tailscale IP:      100.116.249.106
+NetAlertX UI:      192.168.0.164:20211   (optional)
 ```
 
 ## Important notes
@@ -88,6 +97,32 @@ Tailscale IP:      100.116.249.106
 - Tailscale provides the secure remote path instead.
 - If the Bobcat boots with a wildly incorrect date, HTTPS/TLS and Tailscale can fail. The Chrony section addresses this.
 - Back up configuration files before changing them.
+- **Do not install a separate Log2Ram service on this Armbian build.** Armbian already uses RAM-backed/compressed logging with `armbian-ramlog`, so a second implementation is unnecessary and may conflict.
+- NetAlertX is optional and should not be exposed directly to the public Internet; use LAN or Tailscale access.
+
+## Optional NetAlertX install
+
+For a Bobcat that is already configured with this repo:
+
+```bash
+git clone https://github.com/CocoHusky/bobcat300-dns.git
+cd bobcat300-dns
+sudo bash scripts/install-netalertx.sh
+```
+
+Then open:
+
+```text
+http://BOBCAT_LAN_IP:20211
+```
+
+or, over Tailscale:
+
+```text
+http://BOBCAT_TAILSCALE_IP:20211
+```
+
+See [`docs/08-netalertx.md`](docs/08-netalertx.md) for the complete setup, update, backup, and removal instructions.
 
 ## Final validation
 
@@ -102,6 +137,13 @@ chronyc tracking
 tailscale status
 tailscale ip -4
 ss -lntup | grep -E '(:53 |:5335 )'
+```
+
+If NetAlertX is installed:
+
+```bash
+sudo docker ps --filter name=netalertx
+ss -lntup | grep 20211
 ```
 
 Test DNS directly:
