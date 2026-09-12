@@ -10,16 +10,9 @@ client -> Pi-hole :53 -> Unbound 127.0.0.1:5335 -> DNS root/TLD/authoritative se
 
 ## 1. Install Pi-hole
 
-Install required tools first:
-
 ```bash
 sudo apt update
 sudo apt install -y curl dnsutils
-```
-
-Run the official Pi-hole installer:
-
-```bash
 curl -sSL https://install.pi-hole.net | bash
 ```
 
@@ -31,7 +24,7 @@ During setup:
 - allow Pi-hole to install its normal blocklists;
 - the temporary upstream DNS choice does not matter because we will replace it with Unbound.
 
-After installation:
+Check:
 
 ```bash
 pihole status
@@ -43,11 +36,6 @@ Pi-hole should report FTL listening on TCP and UDP port 53.
 
 ```bash
 sudo apt install -y unbound
-```
-
-Create a dedicated Pi-hole Unbound configuration:
-
-```bash
 sudo nano /etc/unbound/unbound.conf.d/pi-hole.conf
 ```
 
@@ -72,7 +60,6 @@ server:
 
     prefetch: yes
     num-threads: 1
-
     so-rcvbuf: 1m
 
     private-address: 192.168.0.0/16
@@ -83,14 +70,12 @@ server:
     private-address: fe80::/10
 ```
 
-The important parts are:
+These are standard private address ranges, not installation-specific addresses. The important local-only settings are:
 
 ```text
 interface: 127.0.0.1
 port: 5335
 ```
-
-This keeps Unbound private to the Bobcat. LAN clients talk to Pi-hole on port 53, not directly to Unbound.
 
 ## 3. Install/update root hints
 
@@ -113,50 +98,26 @@ Test Unbound directly:
 
 ```bash
 dig @127.0.0.1 -p 5335 google.com
-```
-
-Test DNSSEC:
-
-```bash
 dig @127.0.0.1 -p 5335 dnssec.works +dnssec
 ```
 
-A successful DNSSEC-validating response should include the `ad` flag, for example:
-
-```text
-flags: qr rd ra ad
-```
+A DNSSEC-validating response should include the `ad` flag.
 
 ## 5. Point Pi-hole at Unbound
 
 The tested Pi-hole v6 configuration used `/etc/pihole/pihole.toml`.
 
-First make a backup:
-
 ```bash
 sudo cp /etc/pihole/pihole.toml /etc/pihole/pihole.toml.backup
-```
-
-Edit:
-
-```bash
 sudo nano /etc/pihole/pihole.toml
 ```
 
-Set the upstream resolver to:
+Set:
 
 ```toml
 upstreams = [
   "127.0.0.1#5335"
 ]
-```
-
-On the tested appliance this appeared near the top of the file as:
-
-```toml
-upstreams = [
-    "127.0.0.1#5335"
-] ### CHANGED, default = []
 ```
 
 Restart Pi-hole DNS:
@@ -166,17 +127,13 @@ sudo systemctl restart pihole-FTL
 pihole status
 ```
 
-## 6. Allow both LAN and Tailscale clients
+## 6. Allow LAN and Tailscale clients
 
-For Pi-hole v6, the tested system used:
+For Pi-hole v6, the working configuration used:
 
 ```toml
 listeningMode = "ALL"
 ```
-
-in `/etc/pihole/pihole.toml`.
-
-This allowed DNS requests arriving over the LAN interface and `tailscale0`.
 
 Check the current value:
 
@@ -184,21 +141,21 @@ Check the current value:
 grep -n "listeningMode" /etc/pihole/pihole.toml
 ```
 
-If you change it, restart FTL:
+If changed:
 
 ```bash
 sudo systemctl restart pihole-FTL
 ```
 
-`ALL` is appropriate here because the Bobcat is behind the home router/firewall and remote access is through Tailscale. Do **not** port-forward public internet DNS traffic to the Bobcat.
+Use `ALL` only when the host is protected by the LAN firewall and remote access is through Tailscale. Do not port-forward public DNS traffic to the Bobcat.
 
 ## 7. Verify the complete chain
 
-Replace `192.168.0.164` with your Bobcat IP.
+Replace `BOBCAT_LAN_IP` with your own Bobcat LAN address:
 
 ```bash
-dig @192.168.0.164 google.com +short
-dig @192.168.0.164 doubleclick.net +short
+dig @BOBCAT_LAN_IP google.com +short
+dig @BOBCAT_LAN_IP doubleclick.net +short
 ```
 
 Expected behavior:
@@ -208,28 +165,27 @@ google.com       -> normal public IP address
 doubleclick.net  -> blocked response, commonly 0.0.0.0
 ```
 
-Check listening sockets:
+Check sockets:
 
 ```bash
 ss -lntup | grep -E '(:53 |:5335 )'
 ```
 
-You want:
+You want Pi-hole/FTL on port 53 and Unbound on `127.0.0.1:5335`.
 
-- Pi-hole/FTL on port 53;
-- Unbound on `127.0.0.1:5335`.
-
-## 8. Backup the working Unbound config
+## 8. Backup the working configuration
 
 ```bash
 sudo cp /etc/unbound/unbound.conf.d/pi-hole.conf ~/pi-hole-unbound.conf.backup
 ```
 
-Also keep a copy of:
+Keep private backups of:
 
 ```text
 /etc/pihole/pihole.toml
 /etc/unbound/unbound.conf.d/pi-hole.conf
 ```
+
+Do not commit generated backups that contain local hostnames, addresses, or other environment-specific values.
 
 Continue with [04-tailscale.md](04-tailscale.md).
