@@ -45,34 +45,9 @@ Bobcat revisions are not interchangeable. Confirm the model printed on the devic
 
 If your model is not listed, verify it upstream before flashing anything. Do not use a G280/G285 SD image on a G290/G295, or a G290/G295 flasher image on an SD-boot model.
 
-## What the finished system does
+## What this builds
 
-```text
-LAN clients
-   |
-   v
-Bobcat 300
-BOBCAT_LAN_IP
-   |
-   +--> Pi-hole :53
-   |      |
-   |      v
-   |   Unbound 127.0.0.1:5335
-   |      |
-   |      v
-   |   authoritative DNS hierarchy
-   |
-   +--> Tailscale TAILSCALE_IP
-   |      |
-   |      +--> remote devices can use the same Pi-hole
-   |
-   +--> optional NetAlertX :20211
-          |
-          +--> LAN device discovery and change monitoring
-
-```
-
-The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
+LAN and Tailscale clients use Pi-hole on the Bobcat for filtered DNS. Pi-hole forwards locally to Unbound for recursive resolution. The router can continue to provide DHCP.
 
 ```mermaid
 flowchart LR
@@ -115,7 +90,7 @@ These guides cover configuration and operations outside the core installation pa
 
 ## Quick start
 
-Use the five core steps above. Time/RTC setup, router/client DNS, security hardening, and troubleshooting are separate operational guides. NetAlertX remains optional.
+Follow the five core steps above. Use the separate guides for time/RTC, router/client DNS, security hardening, troubleshooting, and optional NetAlertX monitoring.
 
 ## Replace these placeholders
 
@@ -146,53 +121,15 @@ Do not commit real credentials, Wi-Fi SSIDs/passwords, MAC addresses, Tailscale 
 ## Important notes
 
 - Keep the Bobcat on a stable static IP or DHCP reservation.
-- The router can continue handling DHCP; Pi-hole does not need to become the DHCP server.
-- Do not expose TCP/UDP port 53 directly to the public internet.
-- Tailscale provides the secure remote path instead.
-- If the Bobcat boots with a wildly incorrect date, HTTPS/TLS and Tailscale can fail. The Chrony section addresses this.
+- Do not expose TCP/UDP port 53 directly to the public internet; use Tailscale for remote access.
+- If the Bobcat boots with an incorrect date, complete the [time and RTC guide](docs/05-time-and-rtc.md) before relying on Tailscale.
 - Back up configuration files before changing them.
-- Do not install a separate Log2Ram service; this Armbian build already provides RAM-backed/compressed logging through `armbian-ramlog`.
+- Do not install a separate Log2Ram service; Armbian already provides RAM-backed/compressed logging through `armbian-ramlog`.
 - NetAlertX is optional and should be reachable only over trusted LAN/Tailscale paths.
-
-## Optional NetAlertX install
-
-```bash
-git clone https://github.com/CocoHusky/bobcat300-dns.git
-cd bobcat300-dns
-sudo bash scripts/install-netalertx.sh
-```
-
-Then open `http://BOBCAT_LAN_IP:20211` or `http://TAILSCALE_IP:20211` after substituting your own values.
-
-## Final validation
-
-```bash
-hostname
-ip -br addr
-pihole status
-systemctl is-active unbound
-chronyc tracking
-tailscale status
-tailscale ip -4
-ss -lntup | grep -E '(:53 |:5335 )'
-```
-
-Test Unbound directly:
-
-```bash
-dig @127.0.0.1 -p 5335 dnssec.works +dnssec
-```
-
-Test Pi-hole using your Bobcat LAN address:
-
-```bash
-dig @BOBCAT_LAN_IP google.com +short
-dig @BOBCAT_LAN_IP doubleclick.net +short
-```
 
 ## Scope
 
-This project covers supported Bobcat Miner 300 revisions and their documented boot methods. Hardware expansion experiments and unrelated configurations are outside its scope.
+This project covers supported Bobcat Miner 300 revisions and their documented boot methods. Hardware expansion experiments and unrelated configurations are outside its scope. Use [07-validation-maintenance.md](docs/07-validation-maintenance.md) for the complete validation and recovery checklist.
 
 ## License
 
