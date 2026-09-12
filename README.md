@@ -70,7 +70,6 @@ BOBCAT_LAN_IP
           |
           +--> LAN device discovery and change monitoring
 
-Armbian ramlog: /var/log on zram -> /var/log.hdd persistent backing storage
 ```
 
 The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
@@ -92,34 +91,31 @@ flowchart LR
 
 1. [Install the correct Armbian image](docs/01-armbian-install.md).
 2. [Connect the Bobcat by Ethernet or Wi-Fi](docs/02-networking.md).
-3. [Set up time and the RTC](docs/05-time-and-rtc.md).
-4. [Install Pi-hole and Unbound](docs/03-pihole-unbound.md).
-5. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
-6. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
-7. [Validate the installation](docs/07-validation-maintenance.md).
-8. [Apply final security hardening](docs/11-security-hardening.md).
+3. [Install Pi-hole and Unbound](docs/03-pihole-unbound.md).
+4. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
+5. [Validate the installation](docs/07-validation-maintenance.md).
 
 ```mermaid
 flowchart LR
     flash[Install matching Armbian image] --> network[Configure Ethernet or Wi-Fi]
-    network --> time[Set time and write RTC]
-    time --> dns[Install Pi-hole and Unbound]
+    network --> dns[Install Pi-hole and Unbound]
     dns --> ts[Optional: add Tailscale]
-    ts --> clients[Configure router and clients]
-    clients --> validate[Validate services and DNS]
-    validate --> harden[Apply security hardening]
-    validate -. optional .-> monitor[Install NetAlertX]
+    ts --> validate[Validate services and DNS]
 ```
 
-Optional operations:
+## After the core setup
 
-- [NetAlertX LAN monitoring](docs/08-netalertx.md)
-- [Armbian RAM-backed logging](docs/09-storage-and-ramlog.md)
-- [Troubleshooting and time/RTC recovery](docs/10-troubleshooting.md)
+These guides cover configuration and operations outside the core installation path:
+
+- [Time and RTC setup](docs/05-time-and-rtc.md) — complete before Tailscale if the clock is incorrect.
+- [Router and client DNS](docs/06-router-and-clients.md) — point the home network at Pi-hole.
+- [Security hardening](docs/11-security-hardening.md) — apply after validation.
+- [NetAlertX LAN monitoring](docs/08-netalertx.md) — optional.
+- [Troubleshooting and recovery](docs/10-troubleshooting.md).
 
 ## Quick start
 
-Use the numbered documents above. The DNS service is complete after Pi-hole and Unbound; Tailscale, NetAlertX, and storage tuning are optional additions. Do not skip time setup before installing services that depend on HTTPS or TLS. Apply the security-hardening guide after the appliance is working and validated so firewall changes do not complicate initial setup.
+Use the five core steps above. Time/RTC setup, router/client DNS, security hardening, and troubleshooting are separate operational guides. NetAlertX remains optional.
 
 ## Replace these placeholders
 
@@ -155,7 +151,7 @@ Do not commit real credentials, Wi-Fi SSIDs/passwords, MAC addresses, Tailscale 
 - Tailscale provides the secure remote path instead.
 - If the Bobcat boots with a wildly incorrect date, HTTPS/TLS and Tailscale can fail. The Chrony section addresses this.
 - Back up configuration files before changing them.
-- Do not install a separate Log2Ram service on this Armbian build; Armbian already provides RAM-backed/compressed logging through `armbian-ramlog`.
+- Do not install a separate Log2Ram service; this Armbian build already provides RAM-backed/compressed logging through `armbian-ramlog`.
 - NetAlertX is optional and should be reachable only over trusted LAN/Tailscale paths.
 
 ## Optional NetAlertX install

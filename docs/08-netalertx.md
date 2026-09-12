@@ -4,17 +4,6 @@ If the Bobcat is already running Armbian, Pi-hole, Unbound, Tailscale, and Chron
 
 > Pi.Alert is archived. The actively maintained continuation is **NetAlertX**.
 
-## Why NetAlertX instead of Log2Ram
-
-Do **not** install a second Log2Ram-style service on this Armbian image. Armbian already mounts `/var/log` on compressed RAM-backed storage and periodically saves logs to disk. Adding another independent Log2Ram implementation is redundant and may conflict with Armbian's own `armbian-ramlog` service.
-
-Verify the existing service with:
-
-```bash
-systemctl status armbian-ramlog --no-pager
-mount | grep '/var/log'
-```
-
 ## What NetAlertX adds
 
 NetAlertX provides LAN device discovery and change monitoring. It can help you see:

@@ -89,11 +89,7 @@ section "ARP SETTINGS"
 sysctl net.ipv4.conf.all.arp_ignore 2>/dev/null || true
 sysctl net.ipv4.conf.all.arp_announce 2>/dev/null || true
 
-section "RAM LOGGING"
-systemctl is-active armbian-ramlog 2>/dev/null || true
-mount | grep '/var/log' || true
-
-section "STORAGE"
+section "RESOURCES"
 df -h /
 free -h
 
