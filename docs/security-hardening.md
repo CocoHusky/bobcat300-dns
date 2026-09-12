@@ -1,4 +1,4 @@
-# 11. Security hardening
+# Security hardening
 
 Apply this after the appliance is working and has passed the validation steps. The goal is to keep the services needed for DNS, administration, and optional monitoring while reducing unnecessary network exposure.
 

@@ -1,4 +1,4 @@
-# 4. Add Tailscale for secure remote access and remote DNS
+# 3. Add Tailscale for secure remote access and remote DNS
 
 Tailscale gives the Bobcat a private tailnet address and lets laptops/phones use the same Pi-hole when away from home without exposing DNS to the public internet.
 
@@ -135,4 +135,4 @@ Before sharing diagnostics publicly, redact private peer names, tailnet names, I
 
 TLS certificates will fail if the Bobcat boots with a wildly incorrect RTC date. The hardware used for this project once booted with a very old RTC value, causing Tailscale to appear offline even though LAN SSH still worked.
 
-Normal setup is covered in [05-time-and-rtc.md](05-time-and-rtc.md); recovery steps are in [10-troubleshooting.md](10-troubleshooting.md).
+Normal setup is covered in [time-and-rtc.md](time-and-rtc.md); recovery steps are in [troubleshooting.md](troubleshooting.md).

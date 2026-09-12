@@ -1,4 +1,4 @@
-# 6. Point the home network at the Bobcat
+# Router and client DNS
 
 At this point the Bobcat should already answer DNS locally through Pi-hole and Unbound. The next step is making other devices use it automatically.
 
@@ -85,7 +85,7 @@ You should see client queries appear in the dashboard/query log.
 
 ## Remote devices through Tailscale
 
-LAN clients normally use the Bobcat's LAN address. Remote Tailscale clients use the Bobcat's Tailscale address through the tailnet DNS configuration described in [04-tailscale.md](04-tailscale.md).
+LAN clients normally use the Bobcat's LAN address. Remote Tailscale clients use the Bobcat's Tailscale address through the tailnet DNS configuration described in [03-tailscale.md](03-tailscale.md).
 
 ```text
 home client ----LAN----> Pi-hole -> Unbound
@@ -100,4 +100,4 @@ Do not forward router port 53 to the Bobcat.
 
 Pi-hole should be reachable only through trusted LAN interfaces and Tailscale. Tailscale provides encrypted remote connectivity without turning the Bobcat into an open resolver on the internet.
 
-Continue with [07-validation-maintenance.md](07-validation-maintenance.md).
+Continue with [validation-maintenance.md](validation-maintenance.md).

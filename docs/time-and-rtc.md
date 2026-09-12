@@ -1,4 +1,4 @@
-# 5. Set up time and the RTC
+# Time and RTC
 
 Correct time is required before relying on HTTPS, package repositories, DNSSEC, or Tailscale. Complete this step after networking and before Pi-hole or Tailscale setup.
 
@@ -47,4 +47,4 @@ chronyc tracking
 sudo hwclock --systohc
 ```
 
-Use the actual current date and time. Continue with [03-pihole-unbound.md](03-pihole-unbound.md).
+Use the actual current date and time. Continue with [02-pihole-unbound.md](02-pihole-unbound.md).

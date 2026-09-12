@@ -1,4 +1,4 @@
-# 2. Networking and static IP
+# Networking and static IP
 
 The DNS appliance needs a stable LAN address. Use either a manual static address or a DHCP reservation. Replace the placeholders with values from your network.
 
@@ -136,4 +136,4 @@ or, when using Wi-Fi:
 wlan0   UP       BOBCAT_LAN_CIDR
 ```
 
-Continue with [03-pihole-unbound.md](03-pihole-unbound.md).
+Continue with [02-pihole-unbound.md](02-pihole-unbound.md).

@@ -1,4 +1,4 @@
-# 7. Validation, maintenance, backups, and recovery
+# Validation, maintenance, and recovery
 
 Use this page after setup and whenever the Bobcat is rebooted, updated, or moved to a different network.
 
@@ -218,4 +218,4 @@ The recovery path depends on the Bobcat revision: G280/G285 use a microSD image,
 4. restore private configuration backups;
 5. verify with the health-check script.
 
-After the appliance passes validation, apply [11-security-hardening.md](11-security-hardening.md).
+After the appliance passes validation, apply [security-hardening.md](security-hardening.md).

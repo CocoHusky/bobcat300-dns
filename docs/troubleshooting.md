@@ -1,6 +1,6 @@
-# 10. Troubleshooting and time/RTC recovery
+# Troubleshooting and recovery
 
-Normal time and RTC setup is covered in [05-time-and-rtc.md](05-time-and-rtc.md). Use this page when the clock is already wrong or a service failed during recovery.
+Normal time and RTC setup is covered in [time-and-rtc.md](time-and-rtc.md). Use this page when the clock is already wrong or a service failed during recovery.
 
 Correct system time matters because HTTPS, package repositories, Tailscale, DNSSEC, and TLS certificate validation all depend on it.
 
@@ -142,4 +142,4 @@ tailscale ip -4
 
 If the date is correct and Tailscale reconnects automatically, the boot-time recovery is working.
 
-After recovery, return to [06-router-and-clients.md](06-router-and-clients.md) and then complete [07-validation-maintenance.md](07-validation-maintenance.md).
+After recovery, return to [router-and-clients.md](router-and-clients.md) and then complete [validation-maintenance.md](validation-maintenance.md).

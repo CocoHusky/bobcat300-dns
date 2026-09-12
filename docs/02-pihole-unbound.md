@@ -1,4 +1,4 @@
-# 3. Install Pi-hole and Unbound
+# 2. Install Pi-hole and Unbound
 
 This is the core of the conversion. Pi-hole answers DNS requests from clients and applies filtering. Unbound runs locally on the Bobcat and performs recursive DNS resolution.
 
@@ -189,4 +189,4 @@ Keep private backups of:
 
 Do not commit generated backups that contain local hostnames, addresses, or other environment-specific values.
 
-Continue with [04-tailscale.md](04-tailscale.md).
+Continue with [03-tailscale.md](03-tailscale.md).
