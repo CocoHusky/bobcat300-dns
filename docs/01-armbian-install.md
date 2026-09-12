@@ -1,33 +1,67 @@
-# 1. Install Armbian on a Bobcat 300 G285
+# 1. Install Armbian on a supported Bobcat Miner 300
 
-This guide is for the Bobcat Miner 300 G285 / Bobcat 285 based on the Rockchip RK3566.
+Start with the model-specific images and instructions in the [Bobcat-Armbian project](https://github.com/sicXnull/Bobcat-Armbian). Bobcat revisions use different boot methods and device trees.
 
-## Hardware used
+![Bobcat hardware overview](../assets/bobcat-hardware-overview.png)
+
+*Illustration only. Confirm the ports, board revision, and radio hardware on your own device.*
+
+## Supported variants
+
+The upstream project currently lists:
+
+| Variant | Image | Boot method |
+| --- | --- | --- |
+| G280 | `BobcatArmbian280.img.xz` | Boots from microSD; no Wi-Fi listed upstream |
+| G285 | `BobcatArmbian285.img.xz` | Boots from microSD |
+| G290/G295 | `Bobcat29X_EMMC_Flasher.img` | Boots from SD and writes Armbian to internal eMMC |
+
+If your model is not listed, do not guess. Confirm the correct image and boot method upstream first.
+
+## Hardware checklist
 
 - Bobcat Miner 300 G285
-- microSD card; 32 GB is more than enough for this appliance
+- 16 GB microSD card minimum
+- 32 GB or larger high-endurance microSD card recommended
 - computer with a microSD reader
 - Ethernet or Wi-Fi network access
 
 The LoRa concentrator is not required for the DNS appliance.
 
-## Use a G285-compatible Armbian image
+## Use the matching Armbian image
 
-Use the community Bobcat Armbian project:
-
-`https://github.com/sicXnull/Bobcat-Armbian`
-
-For the G285, use the image intended for the Bobcat 285/G285, such as:
-
-```text
-BobcatArmbian285.img.xz
-```
-
-Do not blindly use the G290/G295 image on a G285. The models have different device trees and hardware definitions.
+Download the appropriate file from the upstream [releases](https://github.com/sicXnull/Bobcat-Armbian/releases). G280/G285 SD images leave internal eMMC untouched. The G290/G295 flasher image overwrites internal eMMC, so follow the upstream instructions exactly and do not interrupt power during the flash.
 
 ## Flash the image
 
-On macOS, Linux, or Windows, use a normal image writer such as Raspberry Pi Imager, balenaEtcher, or another tool that can decompress/write `.img.xz` images.
+On macOS, Windows, or Linux, [balenaEtcher](https://etcher.balena.io/) is the simplest option: select the matching `.img.xz` image, select the SD card, flash it, and safely eject it.
+
+Linux and macOS users can also write an extracted image from the terminal. Windows users should use a graphical image writer.
+
+### macOS Terminal
+
+```bash
+xz -d BobcatArmbian285.img.xz
+diskutil list
+diskutil unmountDisk /dev/diskX
+sudo dd if=BobcatArmbian285.img of=/dev/rdiskX bs=4m status=progress
+sync
+diskutil eject /dev/diskX
+```
+
+Replace `diskX` only after confirming it is the SD card.
+
+### Linux Terminal
+
+```bash
+xz -d BobcatArmbian285.img.xz
+lsblk
+sudo umount /dev/sdX*
+sudo dd if=BobcatArmbian285.img of=/dev/sdX bs=4M status=progress conv=fsync
+sync
+```
+
+Replace `/dev/sdX` with the whole SD-card device, not a partition. Verify the device before running `dd`; it overwrites the selected disk.
 
 Write the image to the microSD card, eject it cleanly, and place the card in the Bobcat.
 
@@ -43,12 +77,12 @@ ssh root@BOBCAT_LAN_IP
 
 Replace `BOBCAT_LAN_IP` with the address shown by your router or DHCP server.
 
-The reference image identifies itself as:
+The image should identify itself as an Armbian/Debian ARM64 system for the matching Bobcat board. Exact kernel and Armbian versions change over time.
 
 ```text
-Armbian v26.02 rolling for Bobcat 285
-Linux 6.18.4-current-rockchip64
-Debian Bookworm based userspace
+Armbian ... for Bobcat ...
+Linux ...-rockchip64
+Debian ... userspace
 ```
 
 ## Confirm you are on the expected board and storage
@@ -61,15 +95,15 @@ cat /proc/device-tree/model 2>/dev/null; echo
 tr '\0' '\n' < /proc/device-tree/compatible 2>/dev/null
 ```
 
-For the tested G285, the device-tree model was:
+The device-tree model should identify the matching Bobcat board:
 
 ```text
-Bobcat 285
+Bobcat ...
 ```
 
 The root filesystem was on the microSD card and the original internal eMMC remained present but untouched.
 
-A typical storage layout looked like:
+A typical SD-boot storage layout is:
 
 ```text
 mmcblk0   ~29.7G   microSD / Armbian root

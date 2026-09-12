@@ -2,6 +2,12 @@
 
 The DNS appliance needs a stable LAN address. Use either a manual static address or a DHCP reservation. Replace the placeholders with values from your network.
 
+## Choose Ethernet or Wi-Fi
+
+Ethernet is the best choice for a DNS server because it is more stable and avoids wireless setup during recovery. Wi-Fi is suitable when Ethernet is unavailable and the Bobcat variant includes Wi-Fi. The upstream project lists the G280 as Wi-Fi-free.
+
+Connect Ethernet before first boot when possible. If using Wi-Fi, have the SSID and password ready; configure the connection locally through NetworkManager after SSH access is available.
+
 ## Identify interfaces
 
 ```bash
@@ -63,6 +69,16 @@ sudo nmcli connection modify "WIFI_PROFILE" \
 
 sudo nmcli connection up "WIFI_PROFILE"
 ```
+
+If no Wi-Fi profile exists yet, create one instead:
+
+```bash
+nmcli device wifi list
+sudo nmcli device wifi connect "YOUR_WIFI_SSID" password "YOUR_WIFI_PASSWORD" ifname wlan0
+nmcli connection show
+```
+
+After the connection is working, use its profile name in the static-address example above if you need a manual address. Keep Wi-Fi credentials on the device only; never place them in this project or in screenshots.
 
 Using the router as the Bobcat's own resolver during installation avoids creating a circular dependency before Pi-hole and Unbound are fully configured.
 

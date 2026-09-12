@@ -1,6 +1,6 @@
-# Bobcat 300 DNS Appliance
+# Bobcat Miner DNS Appliance
 
-Repurpose a decommissioned Bobcat Miner 300 (G285 / RK3566) into a small always-on network appliance running:
+Turn a supported Bobcat Miner 300 into a small home-network appliance running:
 
 - Armbian Linux
 - Pi-hole for network-wide DNS filtering
@@ -9,9 +9,41 @@ Repurpose a decommissioned Bobcat Miner 300 (G285 / RK3566) into a small always-
 - Chrony for reliable time synchronization
 - Optional NetAlertX for LAN device discovery and change monitoring
 
-This guide provides a repeatable conversion path. Replace every placeholder with a value from your own network.
+![Bobcat DNS appliance](assets/bobcat-dns-appliance-hero.png)
 
-> Implemented and tested on: Bobcat 285 / G285, Rockchip RK3566, ARM64, approximately 2 GB RAM, with a Debian Bookworm-based Armbian image.
+The goal is practical: reuse inexpensive hardware that is otherwise sitting idle instead of buying a new single-board computer.
+
+The exact board and boot method depend on the Bobcat revision. Use the matching Armbian image before continuing.
+
+## What you need
+
+### Minimum
+
+- A Bobcat model supported by the [Bobcat-Armbian project](https://github.com/sicXnull/Bobcat-Armbian)
+- A reliable 16 GB or larger microSD card
+- A computer with an SD-card writer
+- The Bobcat power supply
+- A network connection
+
+### Recommended
+
+- 32 GB or larger high-endurance microSD card
+- Ethernet for first boot and initial configuration
+- A DHCP reservation or static LAN address
+- A second computer for SSH administration
+
+## Supported hardware
+
+Bobcat revisions are not interchangeable. Confirm the model printed on the device and use the matching image from the [upstream project](https://github.com/sicXnull/Bobcat-Armbian).
+
+| Variant | Boot method | Notes |
+| --- | --- | --- |
+| G280 | microSD | The upstream guide lists this variant as Wi-Fi-free. |
+| G285 | microSD | Runs from the card; internal eMMC can remain untouched. |
+| G290 | eMMC flasher image | The matching image writes Armbian to internal eMMC. |
+| G295 | eMMC flasher image | The matching image writes Armbian to internal eMMC. |
+
+If your model is not listed, verify it upstream before flashing anything. Do not use a G280/G285 SD image on a G290/G295, or a G290/G295 flasher image on an SD-boot model.
 
 ## What the finished system does
 
@@ -43,36 +75,24 @@ Armbian ramlog: /var/log on zram -> /var/log.hdd persistent backing storage
 
 The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
 
-## Installation order
+## Installation path
 
-- [`docs/01-armbian-install.md`](docs/01-armbian-install.md) — install and boot Armbian on the Bobcat
-- [`docs/02-networking.md`](docs/02-networking.md) — hostname, static IP, Ethernet/Wi-Fi, SSH
-- [`docs/03-pihole-unbound.md`](docs/03-pihole-unbound.md) — Pi-hole and recursive DNS setup
-- [`docs/04-tailscale.md`](docs/04-tailscale.md) — remote access and remote Pi-hole DNS
-- [`docs/05-time-sync.md`](docs/05-time-sync.md) — Chrony, RTC, and avoiding TLS failures after reboot
-- [`docs/06-router-and-clients.md`](docs/06-router-and-clients.md) — point the network at the Bobcat
-- [`docs/07-validation-maintenance.md`](docs/07-validation-maintenance.md) — health checks, backups, updates, and recovery
-- [`docs/08-netalertx.md`](docs/08-netalertx.md) — optional LAN device monitoring with NetAlertX
-- [`docs/09-storage-and-ramlog.md`](docs/09-storage-and-ramlog.md) — Armbian RAM-backed logging and storage
-- [`scripts/health-check.sh`](scripts/health-check.sh) — quick validation script
-- [`scripts/install-netalertx.sh`](scripts/install-netalertx.sh) — optional NetAlertX installer
+1. [Install the correct Armbian image](docs/01-armbian-install.md).
+2. [Connect the Bobcat by Ethernet or Wi-Fi](docs/02-networking.md).
+3. [Install Pi-hole and Unbound](docs/03-pihole-unbound.md).
+4. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
+5. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
+6. [Validate the installation](docs/07-validation-maintenance.md).
+
+Optional operations:
+
+- [NetAlertX LAN monitoring](docs/08-netalertx.md)
+- [Armbian RAM-backed logging](docs/09-storage-and-ramlog.md)
+- [Troubleshooting and time/RTC recovery](docs/10-troubleshooting.md)
 
 ## Quick start
 
-1. Flash a Bobcat-compatible Armbian image to microSD.
-2. Boot the Bobcat from microSD.
-3. Configure network access and a static/reserved LAN address.
-4. Set a generic hostname such as `dns-appliance`.
-5. Install Pi-hole.
-6. Install Unbound and listen only on `127.0.0.1:5335`.
-7. Configure Pi-hole to use `127.0.0.1#5335` as its only upstream resolver.
-8. Configure Pi-hole to listen on interfaces needed by LAN and Tailscale.
-9. Install Tailscale and authenticate the node.
-10. Set the Bobcat's Tailscale IP as the tailnet DNS server if remote filtering is desired.
-11. Configure Chrony so time is corrected quickly after boot.
-12. Set the router's LAN DNS server to the Bobcat's static/reserved address.
-13. Optionally install NetAlertX for LAN device monitoring.
-14. Run the validation commands in `docs/07-validation-maintenance.md` or with `scripts/health-check.sh`.
+Use the numbered documents above. The DNS service is complete after step 3; Tailscale, NetAlertX, storage tuning, and time recovery are optional additions.
 
 ## Replace these placeholders
 

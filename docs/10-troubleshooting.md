@@ -1,4 +1,4 @@
-# 5. Reliable time synchronization with Chrony
+# 10. Troubleshooting and time/RTC recovery
 
 Correct system time matters because HTTPS, package repositories, Tailscale, DNSSEC, and TLS certificate validation all depend on it.
 
