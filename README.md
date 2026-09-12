@@ -38,10 +38,10 @@ Bobcat revisions are not interchangeable. Confirm the model printed on the devic
 
 | Variant | Boot method | Notes |
 | --- | --- | --- |
-| G280 | microSD | The upstream guide lists this variant as Wi-Fi-free. |
-| G285 | microSD | Runs from the card; internal eMMC can remain untouched. |
-| G290 | eMMC flasher image | The matching image writes Armbian to internal eMMC. |
-| G295 | eMMC flasher image | The matching image writes Armbian to internal eMMC. |
+| G280 | microSD | Supported upstream; not tested by this repository. The upstream guide lists this variant as Wi-Fi-free. |
+| G285 | microSD | Tested by this repository; internal eMMC can remain untouched. |
+| G290 | eMMC flasher image | Supported upstream; not tested by this repository. The matching image writes Armbian to internal eMMC. |
+| G295 | eMMC flasher image | Supported upstream; not tested by this repository. The matching image writes Armbian to internal eMMC. |
 
 If your model is not listed, verify it upstream before flashing anything. Do not use a G280/G285 SD image on a G290/G295, or a G290/G295 flasher image on an SD-boot model.
 
@@ -84,6 +84,7 @@ The router can continue to provide DHCP. Configure it to hand out the Bobcat as 
 5. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
 6. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
 7. [Validate the installation](docs/07-validation-maintenance.md).
+8. [Apply security hardening](docs/11-security-hardening.md) after the appliance is working and validated.
 
 Optional operations:
 
@@ -93,7 +94,7 @@ Optional operations:
 
 ## Quick start
 
-Use the numbered documents above. The DNS service is complete after Pi-hole and Unbound; Tailscale, NetAlertX, and storage tuning are optional additions. Do not skip time setup before installing services that depend on HTTPS or TLS.
+Use the core documents in the order shown above. The DNS service is complete after Pi-hole and Unbound; Tailscale, NetAlertX, storage tuning, and security hardening are additional steps. Do not skip time setup before installing services that depend on HTTPS or TLS. Apply hardening last so firewall changes do not interrupt initial setup or recovery.
 
 ## Replace these placeholders
 

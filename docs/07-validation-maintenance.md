@@ -210,10 +210,12 @@ Then confirm the Bobcat's current Tailscale address is configured as the tailnet
 
 ## Recovery philosophy
 
-The conversion keeps the original internal storage separate and runs the appliance from microSD. Recovery can therefore be simple:
+The recovery path depends on the Bobcat revision: G280/G285 use a microSD image, while G290/G295 use the upstream eMMC flasher workflow. Recovery can therefore be simple:
 
 1. flash a known-working Bobcat Armbian image;
 2. restore network configuration;
 3. reinstall Pi-hole, Unbound, and Tailscale;
 4. restore private configuration backups;
 5. verify with the health-check script.
+
+After the appliance passes validation, apply [11-security-hardening.md](11-security-hardening.md).

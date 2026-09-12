@@ -66,11 +66,11 @@ sudo mkdir -p /opt/netalertx/db
 
 ### 4. Start NetAlertX
 
-Set the scan subnet to the LAN attached to the default route. Replace the example values with the subnet and interface from your Bobcat:
+Set the scan subnet to the LAN attached to the default route. Use your actual LAN subnet and interface values:
 
 ```bash
 ip -4 route show default
-ip -4 route show dev eth0 proto kernel scope link
+ip -4 route show dev LAN_INTERFACE proto kernel scope link
 ```
 
 The installer derives this automatically. To override it, pass `NETALERTX_SCAN_SUBNET` and optionally `NETALERTX_INTERFACE` when running the installer. NetAlertX must receive `SCAN_SUBNETS` through `APP_CONF_OVERRIDE`; do not leave it unset on a host-network deployment.
@@ -98,7 +98,7 @@ sudo docker run -d \
   -e PUID=20211 \
   -e PGID=20211 \
   -e LISTEN_ADDR=0.0.0.0 \
-  -e APP_CONF_OVERRIDE='{"GRAPHQL_PORT":"20214","SCAN_SUBNETS":"['"'"'192.168.1.0/24 --interface=eth0'"'"']"}' \
+  -e APP_CONF_OVERRIDE='{"GRAPHQL_PORT":"20214","SCAN_SUBNETS":"['"'"'LAN_SUBNET --interface=LAN_INTERFACE'"'"']"}' \
   ghcr.io/netalertx/netalertx:latest
 ```
 
@@ -151,7 +151,7 @@ Start with only new-device notifications. Add down/reconnect notifications only 
 ## Update NetAlertX
 
 ```bash
-sudo env NETALERTX_SCAN_SUBNET=192.168.1.0/24 NETALERTX_INTERFACE=eth0 bash scripts/install-netalertx.sh
+sudo env NETALERTX_SCAN_SUBNET=LAN_SUBNET NETALERTX_INTERFACE=LAN_INTERFACE bash scripts/install-netalertx.sh
 ```
 
 The installer pulls the image before stopping the current container. Persistent configuration and database data stay under `/opt/netalertx`. Replace the example subnet/interface with your own values.
