@@ -158,4 +158,4 @@ Confirm:
 hostname
 ```
 
-Continue with [02-networking.md](02-networking.md).
+If networking is not working, use [02-networking.md](02-networking.md). Otherwise continue with [03-pihole-unbound.md](03-pihole-unbound.md).

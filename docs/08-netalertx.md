@@ -1,6 +1,6 @@
-# Optional network monitoring with NetAlertX
+# 4. Install NetAlertX
 
-If the Bobcat is already running Armbian, Pi-hole, Unbound, Tailscale, and Chrony, you can add **NetAlertX** to watch the LAN for new or changed devices.
+With Armbian, Pi-hole, Unbound, and Tailscale working, install **NetAlertX** to watch the LAN for new or changed devices.
 
 > Pi.Alert is archived. The actively maintained continuation is **NetAlertX**.
 
