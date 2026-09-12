@@ -123,10 +123,10 @@ The expected interface is:
 
 Pi-hole may use `listeningMode = "ALL"` when the appliance must answer DNS on both the LAN interface and Tailscale. This is acceptable only when network exposure is controlled by the host firewall and router.
 
-Check the setting:
+Check the setting with Pi-hole's CLI:
 
 ```bash
-grep -n 'listeningMode' /etc/pihole/pihole.toml
+pihole-FTL --config dns.listeningMode
 ```
 
 Do not expose TCP or UDP port 53 directly to the public internet.
