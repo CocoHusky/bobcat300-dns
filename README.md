@@ -15,6 +15,8 @@ The goal is practical: reuse inexpensive hardware that is otherwise sitting idle
 
 The exact board and boot method depend on the Bobcat revision. Use the matching Armbian image before continuing.
 
+For the complete documentation map, see the [documentation index](docs/README.md).
+
 ## What you need
 
 ### Minimum
@@ -63,6 +65,8 @@ flowchart LR
 ```
 
 ## Core setup
+
+First connect the Bobcat to the network. Use the [networking guide](docs/networking.md) if Ethernet, Wi-Fi, or stable addressing is not already working.
 
 1. [Install the correct Armbian image](docs/01-armbian-install.md).
 2. [Install Pi-hole and Unbound](docs/02-pihole-unbound.md).

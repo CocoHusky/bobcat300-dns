@@ -187,4 +187,4 @@ sudo docker ps --filter name=netalertx
 curl -I --max-time 5 http://127.0.0.1:20211/ || true
 ```
 
-NetAlertX is optional. The Bobcat's DNS appliance functions normally without it.
+When NetAlertX is working, continue with [validation-maintenance.md](validation-maintenance.md). The Bobcat's DNS appliance functions normally without NetAlertX if you do not need LAN monitoring.
