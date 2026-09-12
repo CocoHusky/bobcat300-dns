@@ -1,14 +1,6 @@
 # 2. Networking and static IP
 
-The DNS appliance needs a stable LAN address. The tested build used:
-
-```text
-Hostname: dns-appliance
-LAN IP:   BOBCAT_LAN_IP/24
-Gateway:  ROUTER_LAN_IP
-```
-
-Use values appropriate for your own network.
+The DNS appliance needs a stable LAN address. Use either a manual static address or a DHCP reservation. This public guide intentionally uses placeholders instead of real network values.
 
 ## Identify interfaces
 
@@ -20,12 +12,25 @@ nmcli device status
 Typical interface names on the Bobcat build are:
 
 ```text
-end0     Ethernet
-wlan0    Wi-Fi
+end0        Ethernet
+wlan0       Wi-Fi
 tailscale0  created later by Tailscale
 ```
 
 Use Ethernet when available. Wi-Fi also works for Pi-hole/Unbound because DNS traffic is very small.
+
+## Choose your local values
+
+Write down these values from your own network:
+
+```text
+DNS_HOSTNAME       hostname you want for the Bobcat
+BOBCAT_LAN_CIDR    static LAN address plus prefix, for example YOUR_IP/24
+ROUTER_LAN_IP      router/default-gateway address
+WIFI_PROFILE       NetworkManager Wi-Fi profile name, if using Wi-Fi
+```
+
+Do not copy values from another installation.
 
 ## Configure a static address with NetworkManager
 
@@ -35,35 +40,37 @@ List profiles:
 nmcli connection show
 ```
 
-For Ethernet, replace `Wired connection 1` with the actual profile name:
+For Ethernet, replace the placeholders before running:
 
 ```bash
 sudo nmcli connection modify "Wired connection 1" \
   ipv4.method manual \
-  ipv4.addresses BOBCAT_LAN_IP/24 \
+  ipv4.addresses BOBCAT_LAN_CIDR \
   ipv4.gateway ROUTER_LAN_IP \
   ipv4.dns ROUTER_LAN_IP
 
 sudo nmcli connection up "Wired connection 1"
 ```
 
-For Wi-Fi, if your active profile is named `bobcat-wifi`:
+For Wi-Fi:
 
 ```bash
-sudo nmcli connection modify "bobcat-wifi" \
+sudo nmcli connection modify "WIFI_PROFILE" \
   ipv4.method manual \
-  ipv4.addresses BOBCAT_LAN_IP/24 \
+  ipv4.addresses BOBCAT_LAN_CIDR \
   ipv4.gateway ROUTER_LAN_IP \
   ipv4.dns ROUTER_LAN_IP
 
-sudo nmcli connection up "bobcat-wifi"
+sudo nmcli connection up "WIFI_PROFILE"
 ```
 
 Using the router as the Bobcat's own resolver during installation avoids creating a circular dependency before Pi-hole and Unbound are fully configured.
 
 ## Alternative: DHCP reservation
 
-Instead of a manual static address, you can reserve the Bobcat's MAC address in your router and always assign the same IP. Either approach is fine; the important requirement is that the DNS server address does not change.
+Instead of a manual static address, reserve the Bobcat's MAC address in your router and always assign the same IP. The important requirement is that the DNS server address does not change.
+
+Do not publish the device's real MAC address in documentation or issue reports unless necessary.
 
 ## Verify connectivity
 
@@ -89,7 +96,7 @@ From another LAN machine:
 ssh root@BOBCAT_LAN_IP
 ```
 
-For regular administration, consider creating a non-root user and using SSH keys. The examples in this repo show `root` because that is how the initial appliance was configured.
+For regular administration, consider creating a non-root user and using SSH keys.
 
 ## Check the final network state
 
@@ -102,15 +109,15 @@ ip route
 Expected shape:
 
 ```text
-dns-appliance
+DNS_HOSTNAME
 lo      UNKNOWN  127.0.0.1/8 ::1/128
-end0    UP       BOBCAT_LAN_IP/24
+end0    UP       BOBCAT_LAN_CIDR
 ```
 
 or, when using Wi-Fi:
 
 ```text
-wlan0   UP       BOBCAT_LAN_IP/24
+wlan0   UP       BOBCAT_LAN_CIDR
 ```
 
 Continue with [03-pihole-unbound.md](03-pihole-unbound.md).

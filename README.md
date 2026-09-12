@@ -9,13 +9,11 @@ Repurpose a decommissioned Bobcat Miner 300 (G285 / RK3566) into a small always-
 - Chrony for reliable time synchronization
 - Optional NetAlertX for LAN device discovery and change monitoring
 
-This repository documents the conversion that was actually implemented on a Bobcat 285. It focuses on the useful end state and the repeatable setup steps. It intentionally leaves out abandoned experiments and hardware changes that were never used in the final system.
+This repository documents a working Bobcat 285 conversion and focuses on repeatable setup steps. Public documentation uses placeholders instead of real hostnames, LAN addresses, Tailscale addresses, account names, or private service names.
 
-> Tested reference system: Bobcat 285 / G285, RK3566, ~2 GB RAM, Armbian 26.02 rolling, Linux 6.18.4-current-rockchip64.
+> Tested platform: Bobcat 285 / G285, RK3566, ~2 GB RAM, Armbian 26.02 rolling, Linux 6.18.4-current-rockchip64.
 
 ## What the finished system does
-
-The Bobcat becomes a dedicated DNS appliance on the home network.
 
 ```text
 LAN clients
@@ -32,7 +30,7 @@ BOBCAT_LAN_IP
    |      v
    |   authoritative DNS hierarchy
    |
-   +--> Tailscale 100.x.x.x
+   +--> Tailscale TAILSCALE_IP
    |      |
    |      +--> remote devices can use the same Pi-hole
    |
@@ -41,7 +39,7 @@ BOBCAT_LAN_IP
           +--> LAN device discovery and change monitoring
 ```
 
-The router continues to provide DHCP. The router is configured to hand out the Bobcat as the primary DNS server.
+The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
 
 ## Repository layout
 
@@ -58,12 +56,10 @@ The router continues to provide DHCP. The router is configured to hand out the B
 
 ## Quick start
 
-The detailed procedure is in the docs, but the full flow is:
-
 1. Flash a Bobcat-compatible Armbian image to microSD.
 2. Boot the Bobcat from microSD.
-3. Configure network access and a static LAN address.
-4. Set a hostname such as `dns-appliance`.
+3. Configure network access and a static/reserved LAN address.
+4. Set a generic hostname such as `dns-appliance`.
 5. Install Pi-hole.
 6. Install Unbound and listen only on `127.0.0.1:5335`.
 7. Configure Pi-hole to use `127.0.0.1#5335` as its only upstream resolver.
@@ -71,23 +67,22 @@ The detailed procedure is in the docs, but the full flow is:
 9. Install Tailscale and authenticate the node.
 10. Set the Bobcat's Tailscale IP as the tailnet DNS server if remote filtering is desired.
 11. Configure Chrony so time is corrected quickly after boot.
-12. Set the router's LAN DNS server to the Bobcat's static LAN IP.
+12. Set the router's LAN DNS server to the Bobcat's static/reserved address.
 13. Optionally install NetAlertX for LAN device monitoring.
 14. Run the validation commands in this repo.
 
-## Reference addresses from the tested build
-
-These are examples only. Replace them with your own network values.
+## Placeholders used in this repo
 
 ```text
-Hostname:          dns-appliance
-LAN IP:            BOBCAT_LAN_IP
-LAN gateway:       ROUTER_LAN_IP
-Pi-hole DNS:       BOBCAT_LAN_IP:53
-Unbound:           127.0.0.1:5335
-Tailscale IP:      TAILSCALE_IP
-NetAlertX UI:      BOBCAT_LAN_IP:20211   (optional)
+BOBCAT_LAN_IP      replace with the Bobcat's LAN address
+BOBCAT_LAN_CIDR    replace with the Bobcat's LAN address and prefix
+ROUTER_LAN_IP      replace with the router/gateway address
+TAILSCALE_IP       replace with `tailscale ip -4` output
+DNS_HOSTNAME       replace with the hostname you choose
+WIFI_PROFILE       replace with your NetworkManager Wi-Fi profile name
 ```
+
+Do not commit real credentials, Wi-Fi SSIDs/passwords, MAC addresses, Tailscale state, private hostnames, or personal infrastructure names.
 
 ## Important notes
 
@@ -97,12 +92,10 @@ NetAlertX UI:      BOBCAT_LAN_IP:20211   (optional)
 - Tailscale provides the secure remote path instead.
 - If the Bobcat boots with a wildly incorrect date, HTTPS/TLS and Tailscale can fail. The Chrony section addresses this.
 - Back up configuration files before changing them.
-- **Do not install a separate Log2Ram service on this Armbian build.** Armbian already uses RAM-backed/compressed logging with `armbian-ramlog`, so a second implementation is unnecessary and may conflict.
-- NetAlertX is optional and should not be exposed directly to the public Internet; use LAN or Tailscale access.
+- Do not install a separate Log2Ram service on this Armbian build; Armbian already provides RAM-backed/compressed logging through `armbian-ramlog`.
+- NetAlertX is optional and should be reachable only over trusted LAN/Tailscale paths.
 
 ## Optional NetAlertX install
-
-For a Bobcat that is already configured with this repo:
 
 ```bash
 git clone https://github.com/CocoHusky/bobcat300-dns.git
@@ -110,23 +103,9 @@ cd bobcat300-dns
 sudo bash scripts/install-netalertx.sh
 ```
 
-Then open:
-
-```text
-http://BOBCAT_LAN_IP:20211
-```
-
-or, over Tailscale:
-
-```text
-http://BOBCAT_TAILSCALE_IP:20211
-```
-
-See [`docs/08-netalertx.md`](docs/08-netalertx.md) for the complete setup, update, backup, and removal instructions.
+Then open `http://BOBCAT_LAN_IP:20211` or `http://TAILSCALE_IP:20211` after substituting your own values.
 
 ## Final validation
-
-On the Bobcat:
 
 ```bash
 hostname
@@ -139,23 +118,19 @@ tailscale ip -4
 ss -lntup | grep -E '(:53 |:5335 )'
 ```
 
-If NetAlertX is installed:
-
-```bash
-sudo docker ps --filter name=netalertx
-ss -lntup | grep 20211
-```
-
-Test DNS directly:
+Test Unbound directly:
 
 ```bash
 dig @127.0.0.1 -p 5335 dnssec.works +dnssec
+```
+
+Test Pi-hole using your Bobcat LAN address:
+
+```bash
 dig @BOBCAT_LAN_IP google.com +short
 dig @BOBCAT_LAN_IP doubleclick.net +short
 ```
 
-A working system should return a normal IP for `google.com`, while a blocked domain such as `doubleclick.net` should resolve to a blocking response such as `0.0.0.0` depending on Pi-hole settings.
-
 ## Scope
 
-This repo is specifically about converting the Bobcat into a useful Linux network appliance. It does not document unused USB experiments, speculative hardware mods, or dead-end debugging that was not part of the final conversion.
+This repo is specifically about converting the Bobcat into a useful Linux network appliance. It intentionally omits unused USB experiments, speculative hardware mods, private infrastructure details, and dead-end debugging that was not part of the final conversion.
