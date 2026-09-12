@@ -2,7 +2,7 @@
 
 This Bobcat 300 DNS appliance already uses Armbian, Pi-hole, Unbound, Tailscale, and Chrony. If you also want the Bobcat to watch the LAN for new or changed devices, add **NetAlertX**.
 
-> Pi.Alert is now archived. The actively maintained project is **NetAlertX**.
+> Pi.Alert is archived. The actively maintained continuation is **NetAlertX**.
 
 ## Why NetAlertX instead of Log2Ram
 
@@ -15,8 +15,6 @@ systemctl status armbian-ramlog --no-pager
 mount | grep '/var/log'
 ```
 
-Use NetAlertX if you want an additional useful service rather than duplicating log handling.
-
 ## What NetAlertX adds
 
 NetAlertX provides LAN device discovery and change monitoring. It can help you see:
@@ -27,11 +25,11 @@ NetAlertX provides LAN device discovery and change monitoring. It can help you s
 - device presence history
 - basic network change alerts
 
-This complements Pi-hole rather than replacing it. Pi-hole handles DNS filtering; NetAlertX watches the devices using the network.
+This complements Pi-hole rather than replacing it.
 
 ## Recommended deployment
 
-The cleanest deployment on the Bobcat is Docker with host networking. NetAlertX's current upstream quick-start uses host networking and the capabilities needed for LAN discovery.
+The cleanest deployment on the Bobcat is Docker with host networking so NetAlertX can perform LAN discovery.
 
 ### 1. Confirm architecture and resources
 
@@ -51,7 +49,7 @@ sudo systemctl enable --now docker
 sudo docker version
 ```
 
-Optional: allow the current user to run Docker without `sudo`:
+Optional:
 
 ```bash
 sudo usermod -aG docker "$USER"
@@ -92,35 +90,29 @@ sudo docker logs --tail 100 netalertx
 ss -lntup | grep 20211
 ```
 
-Open the web UI from a LAN computer:
+Open the web UI from a trusted LAN computer using:
 
 ```text
 http://BOBCAT_LAN_IP:20211
 ```
 
-For the reference build:
-
-```text
-http://192.168.0.164:20211
-```
-
-Do not expose this port directly to the public Internet.
+Do not put your real LAN address into this public repository and do not expose this port directly to the public internet.
 
 ## Access through Tailscale
 
-Because the Bobcat already runs Tailscale, the NetAlertX interface can also be reached through the Bobcat's Tailscale IP:
+Because the Bobcat already runs Tailscale, the NetAlertX interface can also be reached through:
 
 ```text
-http://BOBCAT_TAILSCALE_IP:20211
+http://TAILSCALE_IP:20211
 ```
 
-Reference example:
+Get the current address on the Bobcat with:
 
-```text
-http://100.116.249.106:20211
+```bash
+tailscale ip -4
 ```
 
-This is preferable to port-forwarding the NetAlertX UI from the router.
+Do not publish Tailscale peer lists, tailnet names, node IDs, or private device names in screenshots/logs.
 
 ## Update NetAlertX
 
@@ -129,15 +121,15 @@ sudo docker pull ghcr.io/netalertx/netalertx:latest
 sudo docker rm -f netalertx
 ```
 
-Then rerun the same `docker run` command from the installation section. The persistent configuration and database stay under `/opt/netalertx`.
+Then rerun the same `docker run` command. Persistent configuration and database data stay under `/opt/netalertx`.
 
 ## Backup
-
-Include `/opt/netalertx` in backups:
 
 ```bash
 sudo tar -C /opt -czf ~/netalertx-backup-$(date +%F).tar.gz netalertx
 ```
+
+Treat backups as private because NetAlertX data can contain discovered device names, IP addresses, MAC addresses, and network history.
 
 ## Remove NetAlertX
 
@@ -147,7 +139,7 @@ Remove only the container:
 sudo docker rm -f netalertx
 ```
 
-Keep `/opt/netalertx` if you may reinstall later. To remove all NetAlertX data as well:
+Keep `/opt/netalertx` if you may reinstall later. To remove all NetAlertX data:
 
 ```bash
 sudo rm -rf /opt/netalertx
