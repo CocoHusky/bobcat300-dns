@@ -35,6 +35,24 @@ sudo tailscale set --accept-dns=false
 
 The tailnet can still use the Bobcat as its configured nameserver; this setting applies to the Bobcat host and avoids a circular dependency while Tailscale and Chrony bootstrap.
 
+Immediately verify that the host resolver was restored:
+
+```bash
+sudo tailscale debug prefs | grep -E 'CorpDNS|AcceptDNS'
+cat /etc/resolv.conf
+getent hosts debian.org
+```
+
+`CorpDNS` should be `false`, and the lookup should succeed using the normal local resolver. If `/etc/resolv.conf` still points to `100.100.100.100` or another stale Tailscale resolver, restore NetworkManager's managed resolver link:
+
+```bash
+sudo ln -sf /run/NetworkManager/resolv.conf /etc/resolv.conf
+sudo systemctl restart NetworkManager
+getent hosts debian.org
+```
+
+If that target does not exist on your image, inspect the available NetworkManager resolver files with `ls -l /run/NetworkManager/` and use the target provided by that image. Do not overwrite `/etc/resolv.conf` with a public or installation-specific address.
+
 Treat the output of `tailscale status` as environment-specific information. It can include private device names and addresses, so review it before posting publicly.
 
 ## 3. Verify Pi-hole directly over Tailscale
@@ -52,13 +70,13 @@ The normal domain should resolve and a blocked domain should return the Pi-hole 
 If this fails, verify Pi-hole's listening mode:
 
 ```bash
-grep -n "listeningMode" /etc/pihole/pihole.toml
+pihole-FTL --config dns.listeningMode
 ```
 
 Set:
 
-```toml
-listeningMode = "ALL"
+```bash
+sudo pihole-FTL --config dns.listeningMode "ALL"
 ```
 
 Then restart Pi-hole if needed:

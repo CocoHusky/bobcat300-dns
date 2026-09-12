@@ -33,7 +33,22 @@ EOF
 if [ "$INCLUDE_SENSITIVE" = "1" ]; then
   copy_if_exists /var/lib/tailscale/tailscaled.state
   if [ -d /opt/netalertx ]; then
+    netalertx_was_running=0
+    if docker ps --format '{{.Names}}' 2>/dev/null | grep -qx netalertx; then
+      netalertx_was_running=1
+      echo "Stopping NetAlertX briefly for a consistent database backup."
+      docker stop netalertx >/dev/null
+    fi
+    restart_netalertx() {
+      if [ "$netalertx_was_running" -eq 1 ]; then
+        echo "Restarting NetAlertX after backup."
+        docker start netalertx >/dev/null || echo "Warning: restart NetAlertX manually." >&2
+      fi
+    }
+    trap restart_netalertx EXIT
     tar -C /opt -czf "$DEST/netalertx-data.tar.gz" netalertx
+    trap - EXIT
+    restart_netalertx
     echo "Backed up private NetAlertX data: /opt/netalertx"
   fi
   echo "Sensitive backups were included; protect them as private/offline data."

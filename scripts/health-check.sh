@@ -35,11 +35,13 @@ if command -v dig >/dev/null 2>&1; then
 fi
 
 section "LAN DNS"
+LAN_IFACE="${LAN_INTERFACE:-$(ip -4 route show default 2>/dev/null | awk 'NR == 1 {print $5}')}"
 LAN_IP="${LAN_IP:-}"
-if [ -z "$LAN_IP" ]; then
-  LAN_IP="$(ip -4 -o addr show scope global | awk '$2 != "tailscale0" {split($4,a,"/"); print a[1]; exit}')"
+if [ -z "$LAN_IP" ] && [ -n "$LAN_IFACE" ]; then
+  LAN_IP="$(ip -4 -o addr show dev "$LAN_IFACE" scope global | awk 'NR == 1 {split($4,a,"/"); print a[1]}')"
 fi
 
+echo "LAN interface: ${LAN_IFACE:-none}"
 echo "Detected LAN IP: ${LAN_IP:-none}"
 if [ -n "${LAN_IP:-}" ] && command -v dig >/dev/null 2>&1; then
   echo "Normal lookup:"
@@ -54,6 +56,7 @@ if command -v tailscale >/dev/null 2>&1; then
   tailscale status | head -15 || true
   TS_IP="$(tailscale ip -4 2>/dev/null | head -1 || true)"
   echo "Tailscale IPv4: ${TS_IP:-none}"
+  tailscale debug prefs 2>/dev/null | grep -E 'CorpDNS|AcceptDNS' || true
   if [ -n "${TS_IP:-}" ] && command -v dig >/dev/null 2>&1; then
     echo "DNS over Tailscale:"
     dig @"$TS_IP" google.com +short || true
@@ -61,6 +64,10 @@ if command -v tailscale >/dev/null 2>&1; then
 else
   echo "tailscale command not found"
 fi
+
+section "HOST RESOLVER"
+cat /etc/resolv.conf 2>/dev/null || true
+getent hosts debian.org 2>/dev/null || echo "Host resolver lookup failed"
 
 section "LISTENING PORTS"
 ss -lntup 2>/dev/null | grep -E '(:53 |:5335 )' || true

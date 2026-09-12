@@ -13,6 +13,8 @@ chronyc tracking
 tailscale status | head -15
 tailscale ip -4
 ss -lntup | grep -E '(:53 |:5335 )'
+cat /etc/resolv.conf
+getent hosts debian.org
 df -h /
 free -h
 ```
@@ -200,7 +202,7 @@ Check the router DHCP DNS settings. The Bobcat should be the advertised DNS reso
 
 ```bash
 tailscale ip -4
-grep -n "listeningMode" /etc/pihole/pihole.toml
+pihole-FTL --config dns.listeningMode
 dig @"$(tailscale ip -4)" google.com
 ```
 

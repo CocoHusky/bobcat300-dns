@@ -4,6 +4,8 @@ set -euo pipefail
 DATA_DIR="${NETALERTX_DATA_DIR:-/opt/netalertx}"
 PORT="${NETALERTX_PORT:-20211}"
 GRAPHQL_PORT="${NETALERTX_GRAPHQL_PORT:-20214}"
+LAN_IFACE="${NETALERTX_INTERFACE:-$(ip -4 route show default 2>/dev/null | awk 'NR == 1 {print $5}')}"
+SCAN_SUBNET="${NETALERTX_SCAN_SUBNET:-}"
 IMAGE="ghcr.io/netalertx/netalertx:latest"
 SYSCTL_FILE="/etc/sysctl.d/99-netalertx.conf"
 
@@ -28,6 +30,22 @@ fi
 
 systemctl enable --now docker
 
+if [[ -z "${LAN_IFACE}" || "${LAN_IFACE}" == "tailscale0" ]]; then
+  echo "Could not identify a physical default-route interface. Set NETALERTX_INTERFACE." >&2
+  exit 1
+fi
+
+if [[ -z "${SCAN_SUBNET}" ]]; then
+  SCAN_SUBNET="$(ip -4 route show dev "${LAN_IFACE}" proto kernel scope link 2>/dev/null | awk 'NR == 1 {print $1}')"
+fi
+
+if [[ -z "${SCAN_SUBNET}" || "${SCAN_SUBNET}" == "default" ]]; then
+  echo "Could not identify the LAN subnet on ${LAN_IFACE}. Set NETALERTX_SCAN_SUBNET, for example 192.168.1.0/24." >&2
+  exit 1
+fi
+
+APP_CONF_OVERRIDE="{\"GRAPHQL_PORT\":\"${GRAPHQL_PORT}\",\"SCAN_SUBNETS\":\"['${SCAN_SUBNET} --interface=${LAN_IFACE}']\"}"
+
 mkdir -p "${DATA_DIR}/config" "${DATA_DIR}/db"
 
 cat > "${SYSCTL_FILE}" <<'EOF'
@@ -37,12 +55,14 @@ EOF
 sysctl -w net.ipv4.conf.all.arp_ignore=1 >/dev/null
 sysctl -w net.ipv4.conf.all.arp_announce=2 >/dev/null
 
+# Pull before taking down an existing container so a registry or network
+# failure does not unnecessarily interrupt a working installation.
+docker pull "${IMAGE}"
+
 if docker ps -a --format '{{.Names}}' | grep -qx netalertx; then
   echo "Removing existing NetAlertX container; persistent data will be kept in ${DATA_DIR}."
   docker rm -f netalertx
 fi
-
-docker pull "${IMAGE}"
 
 docker run -d \
   --name netalertx \
@@ -66,7 +86,7 @@ docker run -d \
   -e PUID=20211 \
   -e PGID=20211 \
   -e LISTEN_ADDR=0.0.0.0 \
-  -e GRAPHQL_PORT="${GRAPHQL_PORT}" \
+  -e APP_CONF_OVERRIDE="${APP_CONF_OVERRIDE}" \
   "${IMAGE}"
 
 echo "Waiting for NetAlertX to become ready..."
@@ -92,6 +112,7 @@ fi
 
 echo
 echo "NetAlertX started."
+echo "Scan subnet: ${SCAN_SUBNET} via ${LAN_IFACE}"
 echo "LAN UI:       http://<BOBCAT_LAN_IP>:${PORT}"
 echo "Tailscale UI: http://<BOBCAT_TAILSCALE_IP>:${PORT}"
 echo

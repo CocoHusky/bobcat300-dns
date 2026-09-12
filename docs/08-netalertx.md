@@ -66,6 +66,15 @@ sudo mkdir -p /opt/netalertx/db
 
 ### 4. Start NetAlertX
 
+Set the scan subnet to the LAN attached to the default route. Replace the example values with the subnet and interface from your Bobcat:
+
+```bash
+ip -4 route show default
+ip -4 route show dev eth0 proto kernel scope link
+```
+
+The installer derives this automatically. To override it, pass `NETALERTX_SCAN_SUBNET` and optionally `NETALERTX_INTERFACE` when running the installer. NetAlertX must receive `SCAN_SUBNETS` through `APP_CONF_OVERRIDE`; do not leave it unset on a host-network deployment.
+
 ```bash
 sudo docker run -d \
   --name netalertx \
@@ -89,7 +98,7 @@ sudo docker run -d \
   -e PUID=20211 \
   -e PGID=20211 \
   -e LISTEN_ADDR=0.0.0.0 \
-  -e GRAPHQL_PORT=20214 \
+  -e APP_CONF_OVERRIDE='{"GRAPHQL_PORT":"20214","SCAN_SUBNETS":"['"'"'192.168.1.0/24 --interface=eth0'"'"']"}' \
   ghcr.io/netalertx/netalertx:latest
 ```
 
@@ -135,22 +144,37 @@ tailscale ip -4
 
 Do not publish Tailscale peer lists, tailnet names, node IDs, or private device names in screenshots/logs.
 
+## Keep notifications useful
+
+Start with only new-device notifications. Add down/reconnect notifications only for devices you explicitly consider critical. Broad routine event notifications can become noisy and make important changes easy to miss.
+
 ## Update NetAlertX
 
 ```bash
-sudo docker pull ghcr.io/netalertx/netalertx:latest
-sudo docker rm -f netalertx
+sudo env NETALERTX_SCAN_SUBNET=192.168.1.0/24 NETALERTX_INTERFACE=eth0 bash scripts/install-netalertx.sh
 ```
 
-Then rerun the installer. Persistent configuration and database data stay under `/opt/netalertx`.
+The installer pulls the image before stopping the current container. Persistent configuration and database data stay under `/opt/netalertx`. Replace the example subnet/interface with your own values.
 
 ## Backup
 
 ```bash
-sudo tar -C /opt -czf ~/netalertx-backup-$(date +%F).tar.gz netalertx
+sudo env INCLUDE_SENSITIVE_BACKUPS=1 bash scripts/backup-config.sh "$HOME/netalertx-backup"
 ```
 
-Treat backups as private because NetAlertX data can contain discovered device names, IP addresses, MAC addresses, and network history.
+The backup helper stops NetAlertX briefly to create a consistent archive, then restarts it if it was running. Treat backups as private because NetAlertX data can contain discovered device names, IP addresses, MAC addresses, and network history.
+
+## API warnings that are not necessarily a broken install
+
+Some NetAlertX releases may log an unauthorized request from the in-app unread-message polling endpoint even while the authenticated API and GraphQL services work. Before rotating credentials or resetting the installation, verify the actual services:
+
+```bash
+curl -I --max-time 5 http://127.0.0.1:20211/
+curl -I --max-time 5 http://127.0.0.1:20214/docs
+sudo docker logs --tail 100 netalertx
+```
+
+Use the UI's authenticated API/GraphQL checks when available. Treat the warning as an authentication problem only if authenticated requests also fail or the GraphQL service is unavailable.
 
 ## Remove NetAlertX
 

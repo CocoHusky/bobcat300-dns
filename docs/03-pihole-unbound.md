@@ -105,19 +105,11 @@ A DNSSEC-validating response should include the `ad` flag.
 
 ## 5. Point Pi-hole at Unbound
 
-Pi-hole v6 stores this configuration in `/etc/pihole/pihole.toml`.
+Use Pi-hole's configuration CLI so values are validated and written in the format expected by Pi-hole v6. Do not edit `pihole.toml` by hand for these settings.
 
 ```bash
 sudo cp /etc/pihole/pihole.toml /etc/pihole/pihole.toml.backup
-sudo nano /etc/pihole/pihole.toml
-```
-
-Set:
-
-```toml
-upstreams = [
-  "127.0.0.1#5335"
-]
+sudo pihole-FTL --config dns.upstreams '[ "127.0.0.1#5335" ]'
 ```
 
 Restart Pi-hole DNS:
@@ -129,25 +121,27 @@ pihole status
 
 ## 6. Allow LAN and Tailscale clients
 
-For Pi-hole v6, set:
+For Pi-hole v6, set the listening mode with the CLI:
 
-```toml
-listeningMode = "ALL"
+```bash
+sudo pihole-FTL --config dns.listeningMode "ALL"
 ```
 
 Check the value:
 
 ```bash
-grep -n "listeningMode" /etc/pihole/pihole.toml
+pihole-FTL --config dns.upstreams
+pihole-FTL --config dns.listeningMode
 ```
 
-If changed:
+`ALL` permits DNS requests on all interfaces. Before using it, verify that the router has no TCP/UDP 53 port-forward and that the host firewall does not permit unwanted external access:
 
 ```bash
-sudo systemctl restart pihole-FTL
+ss -lntup | grep -E '(:53 )'
+sudo nft list ruleset
 ```
 
-Use `ALL` only when the host is protected by the LAN firewall and remote access is through Tailscale. Do not port-forward public DNS traffic to the Bobcat.
+Use `ALL` only for a deliberately LAN/Tailscale-accessible appliance. Never port-forward public DNS traffic to the Bobcat.
 
 ## 7. Verify the complete chain
 

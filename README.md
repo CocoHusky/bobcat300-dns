@@ -79,10 +79,11 @@ The router can continue to provide DHCP. Configure it to hand out the Bobcat as 
 
 1. [Install the correct Armbian image](docs/01-armbian-install.md).
 2. [Connect the Bobcat by Ethernet or Wi-Fi](docs/02-networking.md).
-3. [Install Pi-hole and Unbound](docs/03-pihole-unbound.md).
-4. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
-5. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
-6. [Validate the installation](docs/07-validation-maintenance.md).
+3. [Set up time and the RTC](docs/05-time-and-rtc.md).
+4. [Install Pi-hole and Unbound](docs/03-pihole-unbound.md).
+5. [Add Tailscale](docs/04-tailscale.md) if remote DNS is wanted.
+6. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
+7. [Validate the installation](docs/07-validation-maintenance.md).
 
 Optional operations:
 
@@ -92,7 +93,7 @@ Optional operations:
 
 ## Quick start
 
-Use the numbered documents above. The DNS service is complete after step 3; Tailscale, NetAlertX, storage tuning, and time recovery are optional additions.
+Use the numbered documents above. The DNS service is complete after Pi-hole and Unbound; Tailscale, NetAlertX, and storage tuning are optional additions. Do not skip time setup before installing services that depend on HTTPS or TLS.
 
 ## Replace these placeholders
 

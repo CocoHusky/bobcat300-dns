@@ -24,4 +24,4 @@ The benefit is fewer small writes to the microSD card, which is useful for an al
 
 Keep a known-good microSD image because it is the primary recovery path. Treat full images and configuration backups as private: they can contain Wi-Fi credentials, local addresses, DNS history, Tailscale identity, and NetAlertX inventory.
 
-Continue with [07-validation-maintenance.md](07-validation-maintenance.md).
+Return to [07-validation-maintenance.md](07-validation-maintenance.md) for the final health check.
