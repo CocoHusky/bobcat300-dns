@@ -8,6 +8,13 @@ Final DNS path:
 client -> Pi-hole :53 -> Unbound 127.0.0.1:5335 -> DNS root/TLD/authoritative servers
 ```
 
+```mermaid
+flowchart LR
+    client[LAN or Tailscale client] --> pihole[Pi-hole<br/>TCP/UDP 53]
+    pihole --> unbound[Unbound<br/>127.0.0.1:5335]
+    unbound --> hierarchy[Root, TLD, and authoritative DNS servers]
+```
+
 ## 1. Install Pi-hole
 
 ```bash

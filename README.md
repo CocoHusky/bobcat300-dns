@@ -75,6 +75,19 @@ Armbian ramlog: /var/log on zram -> /var/log.hdd persistent backing storage
 
 The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
 
+```mermaid
+flowchart LR
+    clients[LAN clients] --> router[Router DHCP]
+    router -->|DNS: BOBCAT_LAN_IP| pihole[Pi-hole<br/>TCP/UDP 53]
+    remote[Remote Tailscale clients] -->|TAILSCALE_IP| pihole
+    pihole --> unbound[Unbound<br/>127.0.0.1:5335]
+    unbound --> roots[DNS hierarchy]
+    bobcat[Bobcat Miner 300<br/>Armbian] --- pihole
+    bobcat --- tailscale[Tailscale]
+    bobcat --- monitor[Optional NetAlertX<br/>TCP 20211]
+    monitor --> lanwatch[LAN discovery]
+```
+
 ## Installation path
 
 1. [Install the correct Armbian image](docs/01-armbian-install.md).
@@ -85,6 +98,18 @@ The router can continue to provide DHCP. Configure it to hand out the Bobcat as 
 6. [Point the router and clients at Pi-hole](docs/06-router-and-clients.md).
 7. [Validate the installation](docs/07-validation-maintenance.md).
 8. [Apply final security hardening](docs/11-security-hardening.md).
+
+```mermaid
+flowchart LR
+    flash[Install matching Armbian image] --> network[Configure Ethernet or Wi-Fi]
+    network --> time[Set time and write RTC]
+    time --> dns[Install Pi-hole and Unbound]
+    dns --> ts[Optional: add Tailscale]
+    ts --> clients[Configure router and clients]
+    clients --> validate[Validate services and DNS]
+    validate --> harden[Apply security hardening]
+    validate -. optional .-> monitor[Install NetAlertX]
+```
 
 Optional operations:
 

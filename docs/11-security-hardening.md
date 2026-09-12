@@ -248,6 +248,17 @@ After the firewall and router checks are complete, the intended exposure is:
 
 There should be no unsolicited public inbound access to the appliance services.
 
+```mermaid
+flowchart LR
+    lan[Trusted LAN] -->|22, 53, 80/443<br/>optional 20211| host[Bobcat firewall]
+    tail[Tailscale peers] -->|22, 53, 80/443<br/>optional 20211| host
+    internet[Internet] -->|UDP 41641 only as needed| host
+    host --> dns[Pi-hole :53]
+    host --> web[Pi-hole / NetAlertX web]
+    host -. localhost only .-> unbound[Unbound :5335]
+    host -. blocked .-> api[NetAlertX API :20214]
+```
+
 ## 11. Ongoing security checks
 
 Periodically review:
