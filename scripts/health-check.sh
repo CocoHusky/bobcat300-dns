@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -u
+
+section() {
+  printf '\n=== %s ===\n' "$1"
+}
+
+section "HOST"
+hostname
+uname -a
+ip -br addr
+
+section "TIME"
+date
+if command -v chronyc >/dev/null 2>&1; then
+  chronyc tracking || true
+else
+  echo "chronyc not installed"
+fi
+
+section "PI-HOLE"
+if command -v pihole >/dev/null 2>&1; then
+  pihole status || true
+else
+  echo "pihole command not found"
+fi
+
+section "UNBOUND"
+systemctl is-active unbound 2>/dev/null || true
+if command -v dig >/dev/null 2>&1; then
+  echo "Direct Unbound lookup:"
+  dig @127.0.0.1 -p 5335 google.com +short || true
+  echo "DNSSEC flags:"
+  dig @127.0.0.1 -p 5335 dnssec.works +dnssec 2>/dev/null | grep 'flags:' || true
+fi
+
+section "LAN DNS"
+LAN_IP="${LAN_IP:-}"
+if [ -z "$LAN_IP" ]; then
+  LAN_IP="$(ip -4 -o addr show scope global | awk '$2 != "tailscale0" {split($4,a,"/"); print a[1]; exit}')"
+fi
+
+echo "Detected LAN IP: ${LAN_IP:-none}"
+if [ -n "${LAN_IP:-}" ] && command -v dig >/dev/null 2>&1; then
+  echo "Normal lookup:"
+  dig @"$LAN_IP" google.com +short || true
+  echo "Blocking lookup:"
+  dig @"$LAN_IP" doubleclick.net +short || true
+fi
+
+section "TAILSCALE"
+if command -v tailscale >/dev/null 2>&1; then
+  systemctl is-active tailscaled 2>/dev/null || true
+  tailscale status | head -15 || true
+  TS_IP="$(tailscale ip -4 2>/dev/null | head -1 || true)"
+  echo "Tailscale IPv4: ${TS_IP:-none}"
+  if [ -n "${TS_IP:-}" ] && command -v dig >/dev/null 2>&1; then
+    echo "DNS over Tailscale:"
+    dig @"$TS_IP" google.com +short || true
+  fi
+else
+  echo "tailscale command not found"
+fi
+
+section "LISTENING PORTS"
+ss -lntup 2>/dev/null | grep -E '(:53 |:5335 )' || true
+
+section "STORAGE"
+df -h /
+free -h
+
+section "SERVICE SUMMARY"
+for svc in pihole-FTL unbound chrony tailscaled; do
+  printf '%-12s ' "$svc"
+  systemctl is-active "$svc" 2>/dev/null || true
+done
