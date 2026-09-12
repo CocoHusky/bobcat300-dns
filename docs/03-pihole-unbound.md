@@ -105,7 +105,7 @@ A DNSSEC-validating response should include the `ad` flag.
 
 ## 5. Point Pi-hole at Unbound
 
-The tested Pi-hole v6 configuration used `/etc/pihole/pihole.toml`.
+Pi-hole v6 stores this configuration in `/etc/pihole/pihole.toml`.
 
 ```bash
 sudo cp /etc/pihole/pihole.toml /etc/pihole/pihole.toml.backup
@@ -129,13 +129,13 @@ pihole status
 
 ## 6. Allow LAN and Tailscale clients
 
-For Pi-hole v6, the working configuration used:
+For Pi-hole v6, set:
 
 ```toml
 listeningMode = "ALL"
 ```
 
-Check the current value:
+Check the value:
 
 ```bash
 grep -n "listeningMode" /etc/pihole/pihole.toml

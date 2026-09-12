@@ -2,7 +2,7 @@
 
 Tailscale gives the Bobcat a private tailnet address and lets laptops/phones use the same Pi-hole when away from home without exposing DNS to the public internet.
 
-This public guide does not include the real Tailscale IP, tailnet name, device names, or account identifiers from the tested system.
+Use the current Tailscale address and names from your own device and account.
 
 ## 1. Install Tailscale
 
@@ -55,7 +55,7 @@ If this fails, verify Pi-hole's listening mode:
 grep -n "listeningMode" /etc/pihole/pihole.toml
 ```
 
-The working configuration used:
+Set:
 
 ```toml
 listeningMode = "ALL"

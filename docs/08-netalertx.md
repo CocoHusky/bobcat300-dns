@@ -1,6 +1,6 @@
 # Optional network monitoring with NetAlertX
 
-This Bobcat 300 DNS appliance already uses Armbian, Pi-hole, Unbound, Tailscale, and Chrony. If you also want the Bobcat to watch the LAN for new or changed devices, add **NetAlertX**.
+If the Bobcat is already running Armbian, Pi-hole, Unbound, Tailscale, and Chrony, you can add **NetAlertX** to watch the LAN for new or changed devices.
 
 > Pi.Alert is archived. The actively maintained continuation is **NetAlertX**.
 
@@ -39,7 +39,7 @@ free -h
 df -h /
 ```
 
-The tested Bobcat G285 is ARM64 (`aarch64`) with about 2 GB RAM.
+The Bobcat G285 is ARM64 (`aarch64`) with about 2 GB RAM.
 
 ### 2. Install Docker
 

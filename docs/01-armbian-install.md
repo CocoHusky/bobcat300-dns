@@ -13,7 +13,7 @@ The LoRa concentrator is not required for the DNS appliance.
 
 ## Use a G285-compatible Armbian image
 
-The tested system used the community Bobcat Armbian project:
+Use the community Bobcat Armbian project:
 
 `https://github.com/sicXnull/Bobcat-Armbian`
 
@@ -43,7 +43,7 @@ ssh root@BOBCAT_LAN_IP
 
 Replace `BOBCAT_LAN_IP` with the address shown by your router or DHCP server.
 
-The tested image identified itself as:
+The reference image identifies itself as:
 
 ```text
 Armbian v26.02 rolling for Bobcat 285
@@ -84,7 +84,7 @@ Do not run installation tools that copy the OS to internal eMMC unless you have 
 
 ## Protect the working kernel while setting up the appliance
 
-On the tested system the working Rockchip kernel/U-Boot packages were held so a normal package upgrade would not unexpectedly change the boot stack:
+On community Bobcat images, consider holding the working Rockchip kernel/U-Boot packages so a normal package upgrade does not unexpectedly change the boot stack:
 
 ```bash
 sudo apt-mark hold \

@@ -2,7 +2,7 @@
 
 Correct system time matters because HTTPS, package repositories, Tailscale, DNSSEC, and TLS certificate validation all depend on it.
 
-On the tested Bobcat, the hardware RTC once restored a date several years in the past during boot. The machine was reachable over LAN SSH, but Tailscale could not authenticate because TLS certificates appeared to be "not yet valid".
+If the hardware RTC restores a date several years in the past during boot, the machine may remain reachable over LAN SSH while TLS-based services such as Tailscale fail.
 
 The fix is to make Chrony correct large clock errors immediately after network access becomes available and keep the RTC synchronized.
 
@@ -27,7 +27,7 @@ sudo systemctl enable --now chrony
 sudo nano /etc/chrony/chrony.conf
 ```
 
-The working configuration already contained these important directives:
+Ensure these directives are present:
 
 ```text
 rtcsync
@@ -60,7 +60,7 @@ A healthy `chronyc tracking` result should show a valid reference source and:
 Leap status : Normal
 ```
 
-The tested system synchronized to within milliseconds after the clock was corrected.
+After correction, allow Chrony time to synchronize before relying on TLS-based services.
 
 ## 4. Check the system clock and RTC
 

@@ -2,13 +2,13 @@
 
 At this point the Bobcat should already answer DNS locally through Pi-hole and Unbound. The next step is making other devices use it automatically.
 
-This public guide uses placeholders instead of real LAN addresses.
+Replace the placeholders with values from your network.
 
 ## Keep DHCP on the router
 
 There is no requirement to make Pi-hole the DHCP server.
 
-The implemented setup kept normal router DHCP and changed only the DNS server distributed to clients:
+Keep normal router DHCP and change only the DNS server distributed to clients:
 
 ```text
 Router

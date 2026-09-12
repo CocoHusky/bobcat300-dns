@@ -1,6 +1,6 @@
 # 2. Networking and static IP
 
-The DNS appliance needs a stable LAN address. Use either a manual static address or a DHCP reservation. This public guide intentionally uses placeholders instead of real network values.
+The DNS appliance needs a stable LAN address. Use either a manual static address or a DHCP reservation. Replace the placeholders with values from your network.
 
 ## Identify interfaces
 

@@ -9,7 +9,7 @@ Repurpose a decommissioned Bobcat Miner 300 (G285 / RK3566) into a small always-
 - Chrony for reliable time synchronization
 - Optional NetAlertX for LAN device discovery and change monitoring
 
-This repository documents a working Bobcat 285 conversion and focuses on repeatable setup steps. Public documentation uses placeholders instead of real hostnames, LAN addresses, Tailscale addresses, account names, or private service names.
+This guide provides a repeatable conversion path. Replace every placeholder with a value from your own network.
 
 > Implemented and tested on: Bobcat 285 / G285, Rockchip RK3566, ARM64, approximately 2 GB RAM, with a Debian Bookworm-based Armbian image.
 
@@ -43,7 +43,7 @@ Armbian ramlog: /var/log on zram -> /var/log.hdd persistent backing storage
 
 The router can continue to provide DHCP. Configure it to hand out the Bobcat as the primary DNS server.
 
-## Repository layout
+## Installation order
 
 - [`docs/01-armbian-install.md`](docs/01-armbian-install.md) — install and boot Armbian on the Bobcat
 - [`docs/02-networking.md`](docs/02-networking.md) — hostname, static IP, Ethernet/Wi-Fi, SSH
@@ -72,9 +72,9 @@ The router can continue to provide DHCP. Configure it to hand out the Bobcat as 
 11. Configure Chrony so time is corrected quickly after boot.
 12. Set the router's LAN DNS server to the Bobcat's static/reserved address.
 13. Optionally install NetAlertX for LAN device monitoring.
-14. Run the validation commands in this repo.
+14. Run the validation commands in `docs/07-validation-maintenance.md` or with `scripts/health-check.sh`.
 
-## Placeholders used in this repo
+## Replace these placeholders
 
 ```text
 BOBCAT_LAN_IP      replace with the Bobcat's LAN address
@@ -136,4 +136,4 @@ dig @BOBCAT_LAN_IP doubleclick.net +short
 
 ## Scope
 
-This repo is specifically about converting the Bobcat into a useful Linux network appliance. It intentionally omits unused USB experiments, speculative hardware mods, private infrastructure details, and dead-end debugging that was not part of the final conversion.
+This project covers the supported microSD-based DNS appliance. Hardware expansion experiments and unrelated configurations are outside its scope.

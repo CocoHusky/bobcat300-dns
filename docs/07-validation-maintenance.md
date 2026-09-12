@@ -130,7 +130,7 @@ sudo apt upgrade
 
 Review changes before accepting them.
 
-On the tested appliance the kernel, device-tree, and U-Boot packages were held because the Bobcat uses a community Armbian image:
+On a community Bobcat Armbian image, the kernel, device-tree, and U-Boot packages may be held to protect a known-good boot stack:
 
 ```bash
 apt-mark showhold

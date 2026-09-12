@@ -1,6 +1,6 @@
 # 9. Storage, RAM logging, and flash-wear reduction
 
-The tested Bobcat runs Armbian from microSD while leaving the original internal eMMC untouched. Armbian already provides compressed RAM-backed logging through `armbian-ramlog`.
+Run Armbian from microSD while leaving the original internal eMMC untouched. Armbian provides compressed RAM-backed logging through `armbian-ramlog`.
 
 ## How logging is arranged
 
