@@ -1,28 +1,13 @@
 # 4. Add Tailscale for secure remote access and remote DNS
 
-Tailscale gives the Bobcat a private tailnet IP and lets laptops/phones use the same Pi-hole when away from home without exposing DNS to the public internet.
+Tailscale gives the Bobcat a private tailnet address and lets laptops/phones use the same Pi-hole when away from home without exposing DNS to the public internet.
 
-The tested Bobcat received:
-
-```text
-100.116.249.106
-```
-
-Your Tailscale IP will be different.
+This public guide does not include the real Tailscale IP, tailnet name, device names, or account identifiers from the tested system.
 
 ## 1. Install Tailscale
 
-Use the official installer:
-
 ```bash
 curl -fsSL https://tailscale.com/install.sh | sh
-```
-
-The tested Debian/Bookworm system installed the `tailscale` package and enabled `tailscaled.service` automatically.
-
-Check it:
-
-```bash
 systemctl status tailscaled --no-pager
 ```
 
@@ -39,19 +24,14 @@ Confirm:
 ```bash
 tailscale status
 tailscale ip -4
-```
-
-You should see a `100.x.x.x` address.
-
-Also confirm the interface exists:
-
-```bash
 ip -br addr show tailscale0
 ```
 
+Treat the output of `tailscale status` as environment-specific information. It can include private device names and addresses, so review it before posting publicly.
+
 ## 3. Verify Pi-hole directly over Tailscale
 
-On the Bobcat itself, use its Tailscale IP:
+Use the address dynamically instead of hard-coding it:
 
 ```bash
 TS_IP="$(tailscale ip -4)"
@@ -59,7 +39,7 @@ dig @"$TS_IP" google.com
 dig @"$TS_IP" doubleclick.net
 ```
 
-On the tested system, the normal domain resolved successfully and the blocked domain returned `0.0.0.0`.
+The normal domain should resolve and a blocked domain should return the Pi-hole blocking response.
 
 If this fails, verify Pi-hole's listening mode:
 
@@ -81,46 +61,36 @@ sudo systemctl restart pihole-FTL
 
 ## 4. Use the Bobcat as tailnet DNS
 
-In the Tailscale admin console, open the DNS settings and add the Bobcat's **Tailscale IP** as a global nameserver.
+In the Tailscale admin console, open DNS settings and add the Bobcat's current Tailscale IP as a global nameserver.
 
-For the tested build that was:
-
-```text
-100.116.249.106
-```
-
-Enable **Override DNS servers** if you want connected tailnet devices to use the Bobcat Pi-hole automatically.
-
-Do not enter the example IP from this repo; use:
+Get that value directly from the device:
 
 ```bash
 tailscale ip -4
 ```
 
-on your own Bobcat.
+Enable **Override DNS servers** if you want connected tailnet devices to use the Bobcat Pi-hole automatically.
+
+Do not copy an address from another installation and do not commit your real tailnet DNS address to this public repository.
 
 ## 5. Test from a remote device
 
 Disconnect a phone/laptop from the home LAN, keep Tailscale connected, and browse normally.
 
-You can also directly test the DNS server from another tailnet device:
+For a direct test, substitute your own address:
 
 ```bash
-dig @100.x.x.x google.com
-dig @100.x.x.x doubleclick.net
+dig @TAILSCALE_IP google.com
+dig @TAILSCALE_IP doubleclick.net
 ```
-
-Replace `100.x.x.x` with the Bobcat Tailscale IP.
 
 ## 6. SSH through Tailscale
 
-Even if the home LAN address changes or you are away from home, normal SSH can use the Tailscale address:
-
 ```bash
-ssh root@100.x.x.x
+ssh root@TAILSCALE_IP
 ```
 
-If MagicDNS is enabled and the name resolves, you may also be able to use the tailnet hostname.
+If MagicDNS is enabled, you may also use your chosen tailnet hostname. Avoid publishing private MagicDNS/tailnet names in logs or screenshots.
 
 ## 7. Useful diagnostics
 
@@ -133,16 +103,10 @@ ip -br addr show tailscale0
 journalctl -u tailscaled -n 50 --no-pager
 ```
 
-A healthy node should show:
-
-```text
-tailscaled: active
-state: Running
-Tailscale IPv4: 100.x.x.x
-```
+Before sharing diagnostics publicly, redact private peer names, tailnet names, IPs, node IDs, login URLs, and account identifiers.
 
 ## Important: Tailscale depends on correct system time
 
-TLS certificates will fail if the Bobcat boots with a wildly incorrect RTC date. On the tested hardware, the RTC once restored a 2017 timestamp, which caused Tailscale to appear offline even though the machine itself was reachable over LAN SSH.
+TLS certificates will fail if the Bobcat boots with a wildly incorrect RTC date. The hardware used for this project once booted with a very old RTC value, causing Tailscale to appear offline even though LAN SSH still worked.
 
-The permanent mitigation is covered in [05-time-sync.md](05-time-sync.md).
+The mitigation is covered in [05-time-sync.md](05-time-sync.md).
