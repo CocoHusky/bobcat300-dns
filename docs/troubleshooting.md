@@ -1,6 +1,6 @@
 # Troubleshooting and recovery
 
-Normal time and RTC setup is covered in [time-and-rtc.md](time-and-rtc.md). Use this page when the clock is already wrong or a service failed during recovery.
+Use this page when the clock is wrong or a service fails during recovery. It includes the time and RTC recovery steps needed by embedded Bobcat hardware.
 
 Correct system time matters because HTTPS, package repositories, Tailscale, DNSSEC, and TLS certificate validation all depend on it.
 
@@ -142,4 +142,4 @@ tailscale ip -4
 
 If the date is correct and Tailscale reconnects automatically, the boot-time recovery is working.
 
-After recovery, return to [router-and-clients.md](router-and-clients.md) and then complete [validation-maintenance.md](validation-maintenance.md).
+After recovery, return to [router-and-clients.md](router-and-clients.md) and then complete [05-validation-maintenance.md](05-validation-maintenance.md).

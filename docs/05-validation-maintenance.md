@@ -218,4 +218,4 @@ The recovery path depends on the Bobcat revision: G280/G285 use a microSD image,
 4. restore private configuration backups;
 5. verify with the health-check script.
 
-After the appliance passes validation, apply [security-hardening.md](security-hardening.md).
+After the appliance passes validation, apply [06-security-hardening.md](06-security-hardening.md).

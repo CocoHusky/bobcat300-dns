@@ -100,4 +100,4 @@ Do not forward router port 53 to the Bobcat.
 
 Pi-hole should be reachable only through trusted LAN interfaces and Tailscale. Tailscale provides encrypted remote connectivity without turning the Bobcat into an open resolver on the internet.
 
-Continue with [validation-maintenance.md](validation-maintenance.md).
+Continue with [05-validation-maintenance.md](05-validation-maintenance.md).

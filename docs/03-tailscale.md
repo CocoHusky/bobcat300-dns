@@ -135,4 +135,4 @@ Before sharing diagnostics publicly, redact private peer names, tailnet names, I
 
 TLS certificates will fail if the Bobcat boots with a wildly incorrect RTC date. The hardware used for this project once booted with a very old RTC value, causing Tailscale to appear offline even though LAN SSH still worked.
 
-Normal time setup is covered in [time-and-rtc.md](time-and-rtc.md); recovery steps are in [troubleshooting.md](troubleshooting.md). When Tailscale is working, continue with [04-netalertx.md](04-netalertx.md) for the final core component.
+If the system clock is wrong, use [troubleshooting.md](troubleshooting.md) before relying on Tailscale. When Tailscale is working, continue with [04-netalertx.md](04-netalertx.md) for the final core component.

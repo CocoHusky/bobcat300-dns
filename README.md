@@ -69,27 +69,28 @@ flowchart LR
 2. [Install Pi-hole and Unbound](docs/02-pihole-unbound.md).
 3. [Add Tailscale](docs/03-tailscale.md).
 4. [Install NetAlertX](docs/04-netalertx.md).
+5. [Validate and maintain the appliance](docs/05-validation-maintenance.md).
+6. [Apply security hardening](docs/06-security-hardening.md).
 
 ```mermaid
 flowchart LR
     flash[Install Armbian and configure network] --> dns[Install Pi-hole and Unbound]
     dns --> ts[Add Tailscale]
     ts --> monitor[Install NetAlertX]
+    monitor --> validate[Validate and maintain]
+    validate --> harden[Apply security hardening]
 ```
 
 ## Supporting guides
 
-These guides contain setup, maintenance, and recovery details outside the four core steps:
+These guides contain setup and recovery details outside the six core steps:
 
-- [Time and RTC setup](docs/time-and-rtc.md) — complete before Tailscale if the clock is incorrect.
 - [Router and client DNS](docs/router-and-clients.md) — point the home network at Pi-hole.
-- [Validation, maintenance, and recovery](docs/validation-maintenance.md).
-- [Troubleshooting and recovery](docs/troubleshooting.md).
-- [Security hardening](docs/security-hardening.md) — apply after the appliance works.
+- [Troubleshooting and recovery](docs/troubleshooting.md) — includes time and RTC recovery.
 
 ## Quick start
 
-Follow the four core steps above. Use the supporting guides when you need networking, time/RTC, router/client DNS, validation, troubleshooting, or hardening details.
+Follow the six core steps above. Use the supporting guides for router/client DNS and troubleshooting when needed.
 
 ## Replace these placeholders
 
@@ -121,14 +122,14 @@ Do not commit real credentials, Wi-Fi SSIDs/passwords, MAC addresses, Tailscale 
 
 - Keep the Bobcat on a stable static IP or DHCP reservation.
 - Do not expose TCP/UDP port 53 directly to the public internet; use Tailscale for remote access.
-- If the Bobcat boots with an incorrect date, complete the [time and RTC guide](docs/time-and-rtc.md) before relying on Tailscale.
+- If the Bobcat boots with an incorrect date, use the [troubleshooting guide](docs/troubleshooting.md) before relying on Tailscale.
 - Back up configuration files before changing them.
 - Do not install a separate Log2Ram service; Armbian already provides RAM-backed/compressed logging through `armbian-ramlog`.
 - Keep NetAlertX reachable only over trusted LAN/Tailscale paths.
 
 ## Scope
 
-This project covers supported Bobcat Miner 300 revisions and their documented boot methods. Hardware expansion experiments and unrelated configurations are outside its scope. Use [validation-maintenance.md](docs/validation-maintenance.md) for the complete validation and recovery checklist.
+This project covers supported Bobcat Miner 300 revisions and their documented boot methods. Hardware expansion experiments and unrelated configurations are outside its scope.
 
 ## License
 
