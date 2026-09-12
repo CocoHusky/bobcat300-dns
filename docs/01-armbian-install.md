@@ -35,13 +35,13 @@ Write the image to the microSD card, eject it cleanly, and place the card in the
 
 Power on the Bobcat and allow several minutes for the first boot.
 
-Once the device is on the network, SSH into it using the address your router assigned.
-
-Example:
+Once the device is on the network, SSH into it using the address your router assigned:
 
 ```bash
-ssh root@192.168.0.164
+ssh root@BOBCAT_LAN_IP
 ```
+
+Replace `BOBCAT_LAN_IP` with the address shown by your router or DHCP server.
 
 The tested image identified itself as:
 
@@ -52,8 +52,6 @@ Debian Bookworm based userspace
 ```
 
 ## Confirm you are on the expected board and storage
-
-Run:
 
 ```bash
 hostnamectl
@@ -105,8 +103,6 @@ This is conservative. Remove a hold only when you deliberately want to test a ke
 
 ## Basic update
 
-After the system boots and networking works:
-
 ```bash
 sudo apt update
 sudo apt upgrade
@@ -116,10 +112,10 @@ Review the proposed upgrade before accepting it, especially on community images.
 
 ## Set the hostname
 
-The tested appliance uses `bobs-dns`:
+Use a generic hostname of your choice, for example:
 
 ```bash
-sudo hostnamectl set-hostname bobs-dns
+sudo hostnamectl set-hostname dns-appliance
 ```
 
 Confirm:
