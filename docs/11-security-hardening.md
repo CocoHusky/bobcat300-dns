@@ -1,118 +1,206 @@
 # 11. Security hardening
 
-Apply this page after the appliance is working and the validation checks pass. Keep a local SSH session open while changing firewall rules so a mistake does not lock you out.
+Apply this after the appliance is working and has passed the validation steps. The goal is to keep the services needed for DNS, administration, and optional monitoring while reducing unnecessary network exposure.
 
-## Remove services you do not need
+This guide intentionally uses generic placeholders. Do not publish real LAN addresses, hostnames, device identifiers, credentials, or private Tailscale information.
 
-Check whether `rpcbind` is installed and listening:
+## 1. Review listening services
+
+Before changing firewall rules, inspect what is listening:
 
 ```bash
-systemctl is-active rpcbind rpcbind.socket 2>/dev/null || true
 ss -lntup
 ```
 
-If you do not use NFS or another service that requires it, disable it:
+For the standard appliance, the expected service roles are:
 
-```bash
-sudo systemctl disable --now rpcbind rpcbind.socket
+```text
+22/tcp          SSH administration
+53/tcp+udp      Pi-hole DNS
+80/tcp          Pi-hole web interface
+443/tcp         Pi-hole web interface
+5335/tcp+udp    Unbound, localhost only
+41641/udp       Tailscale transport
+20211/tcp       optional NetAlertX web interface
+20214/tcp       optional NetAlertX internal API
 ```
 
-Do not disable services blindly. Review the listener list and remove or disable only services you recognize and do not need.
+Other listeners may be valid depending on the operating-system image, but unused services should be reviewed rather than left enabled automatically.
 
-## Review listeners
+## 2. Disable rpcbind when it is not needed
+
+A DNS appliance does not normally need RPC/NFS services. If port 111 is listening and the device is not being used as an NFS/RPC server, disable rpcbind:
 
 ```bash
-sudo ss -lntup
-sudo ss -lnup
+sudo systemctl disable --now rpcbind.service rpcbind.socket
 ```
 
-Expected appliance listeners normally include Pi-hole on port 53, Unbound only on `127.0.0.1:5335`, and Tailscale-managed interfaces. NetAlertX uses ports 20211 and 20214 only when the optional service is installed.
+Verify:
 
-Investigate anything unexpected before exposing the appliance to other networks.
+```bash
+systemctl is-active rpcbind.service rpcbind.socket 2>/dev/null || true
+ss -lntup | grep ':111 ' || echo 'Port 111 is closed'
+```
 
-## Install a host firewall
+Do not disable rpcbind if you intentionally use this machine for services that require it.
 
-If UFW is not installed, install it first:
+## 3. Install a host firewall
+
+Install UFW:
 
 ```bash
 sudo apt update
 sudo apt install -y ufw
 ```
 
-Replace `BOBCAT_LAN_CIDR` with your LAN subnet and `TAILSCALE_CIDR` with the trusted Tailscale address range or your narrower tailnet range. Keep the SSH rule before enabling UFW:
+Set a deny-by-default inbound policy while allowing normal outbound traffic:
 
 ```bash
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
-sudo ufw allow from BOBCAT_LAN_CIDR to any port 22 proto tcp
-sudo ufw allow from TAILSCALE_CIDR to any port 22 proto tcp
-sudo ufw allow from BOBCAT_LAN_CIDR to any port 53 proto tcp
-sudo ufw allow from BOBCAT_LAN_CIDR to any port 53 proto udp
-sudo ufw allow from TAILSCALE_CIDR to any port 53 proto tcp
-sudo ufw allow from TAILSCALE_CIDR to any port 53 proto udp
 ```
 
-If NetAlertX is installed, allow its web and API ports only from trusted networks:
+Allow traffic from the trusted home LAN. Replace `LAN_SUBNET` with the subnet used by your own network:
 
 ```bash
-sudo ufw allow from BOBCAT_LAN_CIDR to any port 20211 proto tcp
-sudo ufw allow from TAILSCALE_CIDR to any port 20211 proto tcp
-sudo ufw allow from BOBCAT_LAN_CIDR to any port 20214 proto tcp
-sudo ufw allow from TAILSCALE_CIDR to any port 20214 proto tcp
+sudo ufw allow from LAN_SUBNET
 ```
 
-Enable and inspect the firewall:
+Allow traffic arriving from Tailscale peers:
+
+```bash
+sudo ufw allow from 100.64.0.0/10
+```
+
+Allow Tailscale's WireGuard transport:
+
+```bash
+sudo ufw allow 41641/udp
+```
+
+Enable the firewall:
 
 ```bash
 sudo ufw enable
 sudo ufw status verbose
 ```
 
-Do not allow port 53 from the public internet. Do not add broad `allow from any` rules for DNS, SSH, or NetAlertX.
+These rules intentionally allow trusted LAN and Tailscale peers to reach the appliance while denying unsolicited inbound traffic from other networks.
 
-## Confirm DNS exposure
+## 4. Why Pi-hole and Unbound still work
 
-Pi-hole `listeningMode "ALL"` is useful for LAN and Tailscale clients, but it binds broadly. Confirm the firewall and router prevent public access:
+The intended DNS path remains:
 
-```bash
-pihole-FTL --config dns.listeningMode
-sudo ufw status verbose
-sudo ss -lntup | grep -E '(:53 )'
+```text
+LAN or Tailscale client
+        |
+        v
+Pi-hole :53
+        |
+        v
+Unbound 127.0.0.1:5335
+        |
+        v
+DNS hierarchy
 ```
 
-Unbound must remain local-only:
+Pi-hole can listen for trusted LAN and Tailscale clients, while Unbound remains reachable only from the local machine.
+
+Verify Unbound is still bound only to localhost:
 
 ```bash
-sudo ss -lntup | grep 5335
+ss -lntup | grep ':5335 '
+grep -RniE '^[[:space:]]*(interface|port):' /etc/unbound/unbound.conf /etc/unbound/unbound.conf.d 2>/dev/null
 ```
 
-The Unbound listener should be `127.0.0.1:5335`, not a LAN or Tailscale address.
+The expected interface is:
 
-## Verify Tailscale transport
-
-Tailscale should carry remote access and remote DNS without router port-forwards:
-
-```bash
-tailscale status
-tailscale netcheck
-sudo ufw status verbose
+```text
+127.0.0.1:5335
 ```
 
-Remove any router port-forward for TCP/UDP 53, 22, 20211, or 20214. Access those services through the trusted LAN or Tailscale instead.
+## 5. Verify Pi-hole exposure
 
-## Re-test the appliance
+Pi-hole may use `listeningMode = "ALL"` when the appliance must answer DNS on both the LAN interface and Tailscale. This is acceptable only when network exposure is controlled by the host firewall and router.
+
+Check the setting:
 
 ```bash
-getent hosts debian.org
-dig @127.0.0.1 -p 5335 dnssec.works +dnssec
+grep -n 'listeningMode' /etc/pihole/pihole.toml
+```
+
+Do not expose TCP or UDP port 53 directly to the public internet.
+
+## 6. Check Tailscale routing behavior
+
+A normal DNS appliance does not need to advertise LAN routes or act as an exit node.
+
+Check:
+
+```bash
+tailscale debug prefs 2>/dev/null | grep -E '"(AdvertiseRoutes|ExitNodeID|CorpDNS|RunSSH)"' || true
+```
+
+Only enable subnet routing, exit-node behavior, or Tailscale SSH if you deliberately want those features.
+
+## 7. Check the router
+
+The router remains an important security boundary. Verify that it does not forward appliance service ports from the public internet unless that exposure is intentional and separately secured.
+
+For this appliance, there is normally no reason to create public port forwards for:
+
+```text
+22      SSH
+53      DNS
+80      Pi-hole web
+443     Pi-hole web
+20211   NetAlertX web
+20214   NetAlertX internal API
+```
+
+Remote access should use Tailscale instead of public port forwarding.
+
+## 8. Validate after enabling the firewall
+
+Test Unbound locally:
+
+```bash
+dig @127.0.0.1 -p 5335 google.com +short
+```
+
+Test Pi-hole on the LAN:
+
+```bash
 dig @BOBCAT_LAN_IP google.com +short
-sudo systemctl is-active pihole-FTL unbound tailscaled
+dig @BOBCAT_LAN_IP doubleclick.net +short
 ```
 
-If NetAlertX is installed:
+If Tailscale is enabled, test through the current Tailscale address:
 
 ```bash
-curl -I --max-time 5 http://127.0.0.1:20211/
+TS_IP="$(tailscale ip -4)"
+dig @"$TS_IP" google.com +short
+dig @"$TS_IP" doubleclick.net +short
 ```
 
-Return to [07-validation-maintenance.md](07-validation-maintenance.md) whenever firewall or service changes affect DNS behavior.
+Confirm the firewall and active listeners:
+
+```bash
+sudo ufw status verbose
+ss -lntup
+```
+
+If all tests pass, the DNS chain is still working while unnecessary inbound exposure is reduced.
+
+## 9. Ongoing security checks
+
+Periodically review:
+
+```bash
+sudo ufw status verbose
+ss -lntup
+systemctl --failed
+docker ps
+```
+
+Keep the operating system and applications updated, review changes before upgrading the community boot stack, and keep private configuration backups outside the public repository.
